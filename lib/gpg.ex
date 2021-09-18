@@ -44,7 +44,6 @@ defmodule GPG do
           return 9888;
       }
 
-      const filename = enginfo.*.file_name;
       var resource_filename = beam.allocator.alloc(u8, 64)
         catch return beam.raise_enomem(env);
       errdefer beam.allocator.free(resource_filename);
@@ -55,10 +54,26 @@ defmodule GPG do
 
 
       return __resource__.create(engine_info_struct, env, .{
-          .filename = filename,
+          .filename = enginfo.*.file_name,
           .homedir = enginfo.*.home_dir,
       }) catch return beam.raise_resource_error(env);
     }
+
+    /// nif: get_filename/1
+    fn get_filename(env: beam.env, res: beam.term) beam.term {
+      var result = __resource__.fetch(engine_info_struct, env, res)
+          catch return beam.raise_resource_error(env);
+      return beam.make_cstring_charlist(env, result.filename);
+    }
+
+    /// nif: get_homedir/1
+    fn get_filename(env: beam.env, res: beam.term) beam.term {
+      var result = __resource__.fetch(engine_info_struct, env, res)
+          catch return beam.raise_resource_error(env);
+      return beam.make_cstring_charlist(env, result.filename);
+    }
+
+
   """
 
   @doc """
