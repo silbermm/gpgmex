@@ -3,11 +3,8 @@ defmodule GPGTest do
   doctest GPG
 
   test "gets gpg version" do
-    version = GPG.check_version()
-    assert version != []
-    assert version != ''
-    assert version != nil
-    assert to_string(version) == "1.16.0"
+    version = GPG.get_engine_version()
+    assert version == "1.16.0"
   end
 
   test "checks if openpgp supported" do
@@ -15,6 +12,6 @@ defmodule GPGTest do
   end
 
   test "gets engine info" do
-    assert GPG.engine_info().filename == "/usr/bin/gpg"
+    assert GPG.get_engine_info().filename == "/usr/bin/gpg"
   end
 end
