@@ -19,7 +19,8 @@ defmodule GPGMEx.MixProject do
 
   defp deps do
     [
-      {:zigler, "~> 0.7.2", runtime: false}
+      {:zigler, "~> 0.7.2", runtime: false},
+      {:ex_doc, "~> 0.24", runtime: false}
     ]
   end
 end
