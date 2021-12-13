@@ -7,7 +7,8 @@ defmodule GPGMEx.MixProject do
       version: "0.1.0",
       elixir: "~> 1.12",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      aliases: [docs: "zig_doc"]
     ]
   end
 
@@ -20,7 +21,8 @@ defmodule GPGMEx.MixProject do
   defp deps do
     [
       {:zigler, "~> 0.7.2", runtime: false},
-      {:ex_doc, "~> 0.24", runtime: false}
+      {:ex_doc, "~> 0.24", runtime: false},
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false}
     ]
   end
 end
