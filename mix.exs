@@ -21,8 +21,9 @@ defmodule GPGMEx.MixProject do
   defp deps do
     [
       {:zigler, "~> 0.7.2", runtime: false},
-      {:ex_doc, "~> 0.24", runtime: false},
-      {:dialyxir, "~> 1.0", only: [:dev], runtime: false}
+      {:ex_doc, "~> 0.27.1", runtime: false},
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false}
     ]
   end
 end

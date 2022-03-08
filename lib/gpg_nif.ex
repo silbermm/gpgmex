@@ -103,7 +103,6 @@ defmodule GPG.NIF do
       }
 
       err = c.gpgme_set_protocol(ceofcontext, c.gpgme_protocol_t.GPGME_PROTOCOL_OpenPGP);
-      
       if (err != c.GPG_ERR_NO_ERROR) {
         return beam.raise_resource_error(env);
       }
@@ -135,8 +134,12 @@ defmodule GPG.NIF do
       var key: c.gpgme_key_t = undefined;
       var err = c.gpgme_op_keylist_start(context.context, email.ptr, 0);
       while (err == c.GPG_ERR_NO_ERROR) {
+          std.log.err("no error yet");
           err = c.gpgme_op_keylist_next(context.context, &key);
-          if (err != c.GPG_ERR_NO_ERROR) break;
+          if (err != c.GPG_ERR_NO_ERROR) {
+            std.log.err("error getting next key");
+            break;
+          }
 
           var cipher: c.gpgme_data_t = undefined;
           err = c.gpgme_data_new(&cipher);
@@ -251,7 +254,27 @@ defmodule GPG.NIF do
           read_new_bytes = c.gpgme_data_read(data, &buf, c.SIZE);
       }
       const buf_slice = buf[0..];
+      
+      // RELEASE THE POINTERS
+      c.gpgme_data_release(data);
+
       return beam.make_cstring_charlist(env, buf_slice);
+    }
+
+    /// nif: generate_key/3
+    fn generate_key(env: beam.env, res: beam.term, email: beam.term, expires: beam.term) beam.term {
+      var context = __resource__.fetch(context_struct, env, res)
+          catch return beam.raise_resource_error(env);
+
+      var err = c.gpgme_op_createkey(context.context, email, null, 0, 0, null, c.GPGME_CREATE_CERT);
+      if (err != c.GPG_ERR_NO_ERROR) {
+        if (err == c.GPG_ERR_NOT_SUPPORTED) {
+          return beam.make_error_term(env, 190);
+        }
+        std.log.err("ERROR {}", .{err});
+        return beam.raise_resource_error(env);
+      }
+      return 0;
     }
   """
 end
