@@ -134,10 +134,8 @@ defmodule GPG.NIF do
       var key: c.gpgme_key_t = undefined;
       var err = c.gpgme_op_keylist_start(context.context, email.ptr, 0);
       while (err == c.GPG_ERR_NO_ERROR) {
-          std.log.err("no error yet");
           err = c.gpgme_op_keylist_next(context.context, &key);
           if (err != c.GPG_ERR_NO_ERROR) {
-            std.log.err("error getting next key");
             break;
           }
 
