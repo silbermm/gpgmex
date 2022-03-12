@@ -110,9 +110,11 @@ defmodule GPG do
     _e -> :error
   end
 
-  @doc ""
+  @doc """
+  Generate a GPG key
+  """
   def generate_key(email) do
     create_context()
-    |> GPG.NIF.generate_key(email, "")
+    |> GPG.NIF.generate_key(email)
   end
 end
