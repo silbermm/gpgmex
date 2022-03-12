@@ -15,7 +15,18 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 defmodule GPG do
   @moduledoc """
-  GnuPG bindings
+
+  [GnuPG](https://gnupg.org/) bindings
+
+  ## Getting Started
+
+  In order to use this library, you'll need a few things on your target system
+    * A working version of [gpg](https://gnupg.org/) installed
+    * [gpgme c library](https://gnupg.org/related_software/gpgme/index.html)
+
+  ### Configuration
+  TODO
+
   """
 
   @doc "Get the currently installed GPG version."
@@ -37,18 +48,18 @@ defmodule GPG do
     _e -> :error
   end
 
-  @doc "Creates a context and returns the reference."
-  @spec create_context() :: reference() | :error
-  def create_context() do
+  @spec create_context() :: reference() | {:error, any()}
+  defp create_context() do
     # must check_version before creating a context
-    # TODO: what if check_version fails?
     _version = GPG.NIF.check_version()
     GPG.NIF.create_context()
   catch
-    _e -> :error
+    e -> {:error, e}
   end
 
-  @doc "Get the public key for an email"
+  @doc """
+  Get the public key for an email if the public key is on your system
+  """
   @spec get_public_key(binary()) :: binary() | :error
   def get_public_key(email) do
     create_context()
@@ -97,5 +108,13 @@ defmodule GPG do
     |> to_string()
   catch
     _e -> :error
+  end
+
+  @doc """
+  Generate a GPG key
+  """
+  def generate_key(email) do
+    create_context()
+    |> GPG.NIF.generate_key(email)
   end
 end
