@@ -24,12 +24,11 @@ defmodule GPG do
     * A working version of [gpg](https://gnupg.org/) installed
     * [gpgme c library](https://gnupg.org/related_software/gpgme/index.html)
 
-  ### Configuration
-  TODO
-
   """
 
-  @doc "Get the currently installed GPG version."
+  @doc """
+  Get the currently installed GPG library version
+  """
   @spec get_engine_version() :: String.t() | :error
   def get_engine_version do
     version = GPG.NIF.check_version()
@@ -38,7 +37,9 @@ defmodule GPG do
     _e -> :error
   end
 
-  @doc "Get information about the currently installed GPG service."
+  @doc """
+  Get information about the currently installed GPG library
+  """
   @spec get_engine_info() :: map() | :error
   def get_engine_info() do
     ref = GPG.NIF.engine_info()
@@ -71,7 +72,7 @@ defmodule GPG do
   end
 
   @doc """
-  Encrypt data for the requtested email recipient
+  Encrypt data for the requested email recipient
 
   ## Examples
 
@@ -93,7 +94,9 @@ defmodule GPG do
   end
 
   @doc """
-  Decrypt the given data
+  Decrypt the given data. This only works if you have the
+  private key available on your system that matches the 
+  public key that encrypted it
 
   ## Examples
 
@@ -111,8 +114,9 @@ defmodule GPG do
   end
 
   @doc """
-  Generate a GPG key
+  Generate a GPG key using the provided email address 
   """
+  @spec generate_key(String.t()) :: binary()
   def generate_key(email) do
     create_context()
     |> GPG.NIF.generate_key(email)

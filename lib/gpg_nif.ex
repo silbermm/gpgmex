@@ -101,7 +101,7 @@ defmodule GPG.NIF do
       }
 
       // set engine info in our context
-      err = c.gpgme_ctx_set_engine_info(ceofcontext, c.gpgme_protocol_t.GPGME_PROTOCOL_OpenPGP, "/usr/bin/gpg2", "/home/silbermm/.gnupg/");
+      err = c.gpgme_ctx_set_engine_info(ceofcontext, c.gpgme_protocol_t.GPGME_PROTOCOL_OpenPGP, "/usr/bin/gpg2", "~/.gnupg/");
       if (err != c.GPG_ERR_NO_ERROR) {
           std.log.err("ERROR {}", .{err});
           return beam.raise_resource_error(env);
@@ -244,7 +244,7 @@ defmodule GPG.NIF do
       return beam.make_cstring_charlist(env, buf_slice);
   }
 
-  /// nif: generate_key/3
+  /// nif: generate_key/2
   fn generate_key(env: beam.env, res: beam.term, email: []u8) c_ulong {
       var context = __resource__.fetch(context_struct, env, res) catch return beam.raise_resource_error(env);
 
