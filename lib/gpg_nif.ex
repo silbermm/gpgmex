@@ -244,12 +244,12 @@ defmodule GPG.NIF do
       return beam.make_cstring_charlist(env, buf_slice);
   }
 
-  /// nif: generate_key/2
-  fn generate_key(env: beam.env, res: beam.term, email: []u8) c_ulong {
+  /// nif: generate_key/3
+  fn generate_key(env: beam.env, res: beam.term, email: []u8, with_password: bool) c_ulong {
       var context = __resource__.fetch(context_struct, env, res) catch return beam.raise_resource_error(env);
-
-      var err = c.gpgme_op_createkey(context.context, email.ptr, null, 0, 0, null, c.GPGME_CREATE_CERT & c.GPGME_CREATE_NOEXPIRE & c.GPGME_CREATE_ENCR);
-      if (err != c.GPG_ERR_NO_ERROR) {
+      if (with_password) {
+        var err = c.gpgme_op_createkey(context.context, email.ptr, null, 0, 0, null, c.GPGME_CREATE_CERT & c.GPGME_CREATE_NOEXPIRE & c.GPGME_CREATE_ENCR);
+if (err != c.GPG_ERR_NO_ERROR) {
           if (err == c.GPG_ERR_NOT_SUPPORTED) {
               return beam.make_error_term(env, 190);
           }
@@ -257,6 +257,47 @@ defmodule GPG.NIF do
           return beam.raise_resource_error(env);
       }
       return 0;
+
+      } else {
+        var err = c.gpgme_op_createkey(context.context, email.ptr, null, 0, 0, null, c.GPGME_CREATE_CERT & c.GPGME_CREATE_NOEXPIRE & c.GPGME_CREATE_ENCR & c.GPGME_CREATE_NOPASSWD);
+if (err != c.GPG_ERR_NO_ERROR) {
+          if (err == c.GPG_ERR_NOT_SUPPORTED) {
+              return beam.make_error_term(env, 190);
+          }
+          std.log.err("ERROR {}", .{err});
+          return beam.raise_resource_error(env);
+      }
+      return 0;
+
+      }
+  }
+
+  /// nif: delete_key/2
+  fn delete_key(env: beam.env, res: beam.term, email: []u8) c_ulong {
+      var context = __resource__.fetch(context_struct, env, res) catch return beam.raise_resource_error(env);
+
+      var key: c.gpgme_key_t = undefined;
+      var err = c.gpgme_op_keylist_start(context.context, email.ptr, 0);
+      while (err == c.GPG_ERR_NO_ERROR) {
+          err = c.gpgme_op_keylist_next(context.context, &key);
+          if (err != c.GPG_ERR_NO_ERROR) {
+            // RELEASE THE POINTERS
+            c.gpgme_key_release(key);
+            break;
+          }
+
+          err = c.gpgme_op_delete_ext(context.context, key, c.GPGME_DELETE_ALLOW_SECRET | c.GPGME_DELETE_FORCE);
+          if (err != c.GPG_ERR_NO_ERROR) {
+            c.gpgme_key_release(key);
+            break;
+          }
+
+          c.gpgme_key_release(key);
+          return 0;
+      }
+
+      c.gpgme_key_release(key);
+      return 1;
   }
   """
 end

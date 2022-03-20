@@ -6,11 +6,7 @@ defmodule GPGTest do
 
   test "gets gpg version" do
     version = GPG.get_engine_version()
-    assert version == "1.16.0"
-  end
-
-  test "checks if openpgp supported" do
-    assert GPG.check_openpgp_supported()
+    assert version == "1.17.1"
   end
 
   test "gets engine info" do
@@ -19,11 +15,10 @@ defmodule GPGTest do
 
   test "encrypt/decrypt" do
     data = "This data should be encrypted"
-    ctx = GPG.context()
-    cipher = GPG.encrypt_for(ctx, @user_email, data)
+    cipher = GPG.encrypt(@user_email, data)
     assert cipher =~ "-----BEGIN PGP MESSAGE-----"
 
-    plain_text = GPG.decrypt_data(ctx, cipher)
+    plain_text = GPG.decrypt(cipher)
     assert plain_text == data
   end
 end

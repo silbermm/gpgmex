@@ -73,15 +73,6 @@ defmodule GPG do
 
   @doc """
   Encrypt data for the requested email recipient
-
-  ## Examples
-
-      iex> encrypt("myemail@mydomain.com", "data to encrypt")
-      "-----BEGIN PGP MESSAGE-----\\n\\nhQIMA1M1Dqrc4va7ARAAtivmEVIg8WAqYgrLBmFbU1iqp2qhfUq9QyPyJLEfmsOg\\nsJm4L7ZG4LKAA9YpEREzmOYr722MfzN2MDy3ssgBJ2/hHBRIXR5fQrlib6dQnyzE\\nkcN2jpUHlmy3p0CTXkH/i1NG3xSRcoapruFvvICCRE+s6zMrtM5qxlEPSV11NHlG\\nEN/wyCfLc66Xu2vGMpLY+9wIeHJmYK7Zpy2K+snHqdnNRnAY2VGZITAcaXjfIjqB\\nKV54ZD1DKebi5P8mJ0pRhgIvCpTVR4+MJk+s5/Rkase6Ckp3jar/Tj5vlbMEPqb7\\nrsp0PoBqE7PNaMXu9sOu/XUwMOLiKsBnpuBojXbrUEHn7/WZ2gd5n1+qax0e9k4X\\nzv+yJ1HV/M6xBsQQfrUB1OoDCHBNjuQPYHcBV7LcQYlBJ80gopgUcsNnZTW9seAN\\nn/6ZUdBeDs7U/CFTinMdOukHp0bqcCd1A69CvCl2zzj/SnNESL01az4wT4AiK3YU\\ntpQ6zznCroxaYd6zJx5xtCBh1xtb4BruRrygvrEI0XpdQ6SU02jr+KqcB3pPhbqI\\nr8woSdHNs2fU+mEGPf2mgPmKAmygnzveE99gpha/dk7NGmnNg3ExQF+jaY4+ADBY\\ndh3Zx9JNurL8EwoNSL/PWw/7suM7vkWy0FaInXVcvEhFfVFu6fRsKPTMJ8+GB9PS\\nSgFHykbYtA3PgISBswfYpI68ynOGRes3jT/Uktu7l4MbDnOere/OAq629awDYG6H\\nFWVc8kcPIRp2LoI8FeYcZz/dj8UJAAP57r58\\n=T/Al\\n-----END PGP MESSAGE-----\\n"
-
-      iex> encrypt("someotheremail@non-existant.com", "data to encrypt")
-      {:error, :keynoexist}
-
   """
   @spec encrypt(String.t(), binary()) :: binary() | {:error, :keynoexist}
   def encrypt(email, data) do
@@ -97,11 +88,6 @@ defmodule GPG do
   Decrypt the given data. This only works if you have the
   private key available on your system that matches the 
   public key that encrypted it
-
-  ## Examples
-
-      iex> decrypt("-----BEGIN PGP MESSAGE-----\\n\\nhQIMA1M1Dqrc4va7ARAAtivmEVIg8WAqYgrLBmFbU1iqp2qhfUq9QyPyJLEfmsOg\\nsJm4L7ZG4LKAA9YpEREzmOYr722MfzN2MDy3ssgBJ2/hHBRIXR5fQrlib6dQnyzE\\nkcN2jpUHlmy3p0CTXkH/i1NG3xSRcoapruFvvICCRE+s6zMrtM5qxlEPSV11NHlG\\nEN/wyCfLc66Xu2vGMpLY+9wIeHJmYK7Zpy2K+snHqdnNRnAY2VGZITAcaXjfIjqB\\nKV54ZD1DKebi5P8mJ0pRhgIvCpTVR4+MJk+s5/Rkase6Ckp3jar/Tj5vlbMEPqb7\\nrsp0PoBqE7PNaMXu9sOu/XUwMOLiKsBnpuBojXbrUEHn7/WZ2gd5n1+qax0e9k4X\\nzv+yJ1HV/M6xBsQQfrUB1OoDCHBNjuQPYHcBV7LcQYlBJ80gopgUcsNnZTW9seAN\\nn/6ZUdBeDs7U/CFTinMdOukHp0bqcCd1A69CvCl2zzj/SnNESL01az4wT4AiK3YU\\ntpQ6zznCroxaYd6zJx5xtCBh1xtb4BruRrygvrEI0XpdQ6SU02jr+KqcB3pPhbqI\\nr8woSdHNs2fU+mEGPf2mgPmKAmygnzveE99gpha/dk7NGmnNg3ExQF+jaY4+ADBY\\ndh3Zx9JNurL8EwoNSL/PWw/7suM7vkWy0FaInXVcvEhFfVFu6fRsKPTMJ8+GB9PS\\nSgFHykbYtA3PgISBswfYpI68ynOGRes3jT/Uktu7l4MbDnOere/OAq629awDYG6H\\nFWVc8kcPIRp2LoI8FeYcZz/dj8UJAAP57r58\\n=T/Al\\n-----END PGP MESSAGE-----\\n")
-      "data to encrypt"
   """
   @spec decrypt(binary()) :: binary() | :error
   def decrypt(data) do
@@ -116,9 +102,22 @@ defmodule GPG do
   @doc """
   Generate a GPG key using the provided email address 
   """
-  @spec generate_key(String.t()) :: binary()
-  def generate_key(email) do
+  @spec generate_key(String.t(), boolean()) :: binary() | :error
+  def generate_key(email, with_password) do
     create_context()
-    |> GPG.NIF.generate_key(email)
+    |> GPG.NIF.generate_key(email, with_password)
+  catch
+    _e -> :error
+  end
+  
+  @doc """
+  Delete an existing GPG key
+  """
+  @spec delete_key(binary()) :: number() | :error
+  def delete_key(email) do
+    create_context()
+    |> GPG.NIF.delete_key(email)
+  catch
+    _e -> :error
   end
 end
