@@ -125,7 +125,12 @@ defmodule GPG.NIF do
       while (err == c.GPG_ERR_NO_ERROR) {
           err = c.gpgme_op_keylist_next(context.context, &key);
           if (err != c.GPG_ERR_NO_ERROR) {
-              break;
+
+            _ = c.gpgme_op_keylist_end(context.context);
+            c.gpgme_key_release(key);
+            c.gpgme_release(context.context);
+
+            return beam.make_error_binary(env, "error retrieving key");
           }
 
           var cipher: c.gpgme_data_t = undefined;
@@ -136,9 +141,13 @@ defmodule GPG.NIF do
           var keys = [_]c.gpgme_key_t{ key, null };
 
           err = c.gpgme_op_encrypt(context.context, &keys, c.gpgme_encrypt_flags_t.GPGME_ENCRYPT_ALWAYS_TRUST, to_encrypt, cipher);
-          if (err != c.GPG_ERR_NO_ERROR) break;
-
-          //_ = c.gpgme_op_encrypt_result(context.context);
+          if (err != c.GPG_ERR_NO_ERROR) {
+            _ = c.gpgme_op_keylist_end(context.context);
+            c.gpgme_data_release(cipher);
+            c.gpgme_key_release(key);
+            c.gpgme_release(context.context);
+            return beam.make_error_binary(env, "error encrypting the data");
+          }
 
           // READ THE ENCRYPTED DATA
           var d: [c.SIZE]u8 = undefined;
@@ -148,14 +157,16 @@ defmodule GPG.NIF do
               read_new_bytes_2 = c.gpgme_data_read(cipher, &d, c.SIZE);
           }
 
-          // RELEASE THE POINTERS
+          _ = c.gpgme_op_keylist_end(context.context);
           c.gpgme_data_release(to_encrypt);
           c.gpgme_data_release(cipher);
           c.gpgme_key_release(key);
+          c.gpgme_release(context.context);
+
           const buf_slice = d[0..];
-          return beam.make_cstring_charlist(env, buf_slice);
+          return beam.make_ok_term(env, beam.make_cstring_charlist(env, buf_slice));
       }
-      return beam.raise_resource_error(env);
+      return beam.make_error_binary(env, "key not found");
   }
 
   /// Decrypt data
@@ -170,13 +181,13 @@ defmodule GPG.NIF do
       err = c.gpgme_data_new(&decrypted);
       if (err != c.GPG_ERR_NO_ERROR) {
           std.log.err("unable to build data obj {}", .{err});
-          return beam.raise_resource_error(env);
+          return beam.make_error_binary(env, "unable to build data object");
       }
 
       err = c.gpgme_op_decrypt(context.context, cipher, decrypted);
       if (err != c.GPG_ERR_NO_ERROR) {
           std.log.err("unable to decrpyt {}", .{err});
-          return beam.raise_resource_error(env);
+          return beam.make_error_binary(env, "unable to decrypt cipher");
       }
 
       // READ THE ENCRYPTED DATA
@@ -191,7 +202,7 @@ defmodule GPG.NIF do
       c.gpgme_data_release(decrypted);
       c.gpgme_data_release(cipher);
       const buf_slice = d[0..];
-      return beam.make_cstring_charlist(env, buf_slice);
+      return beam.make_ok_term(env, beam.make_cstring_charlist(env, buf_slice));
   }
 
   /// Get the public key for a particular email
@@ -244,12 +255,11 @@ defmodule GPG.NIF do
       return beam.make_cstring_charlist(env, buf_slice);
   }
 
-  /// nif: generate_key/3
-  fn generate_key(env: beam.env, res: beam.term, email: []u8, with_password: bool) c_ulong {
+  /// nif: generate_key/2
+  fn generate_key(env: beam.env, res: beam.term, email: []u8) c_ulong {
       var context = __resource__.fetch(context_struct, env, res) catch return beam.raise_resource_error(env);
-      if (with_password) {
-        var err = c.gpgme_op_createkey(context.context, email.ptr, null, 0, 0, null, c.GPGME_CREATE_CERT & c.GPGME_CREATE_NOEXPIRE & c.GPGME_CREATE_ENCR);
-if (err != c.GPG_ERR_NO_ERROR) {
+      var err = c.gpgme_op_createkey(context.context, email.ptr, null, 0, 0, null, c.GPGME_CREATE_CERT & c.GPGME_CREATE_NOEXPIRE & c.GPGME_CREATE_ENCR);
+      if (err != c.GPG_ERR_NO_ERROR) {
           if (err == c.GPG_ERR_NOT_SUPPORTED) {
               return beam.make_error_term(env, 190);
           }
@@ -257,19 +267,6 @@ if (err != c.GPG_ERR_NO_ERROR) {
           return beam.raise_resource_error(env);
       }
       return 0;
-
-      } else {
-        var err = c.gpgme_op_createkey(context.context, email.ptr, null, 0, 0, null, c.GPGME_CREATE_CERT & c.GPGME_CREATE_NOEXPIRE & c.GPGME_CREATE_ENCR & c.GPGME_CREATE_NOPASSWD);
-if (err != c.GPG_ERR_NO_ERROR) {
-          if (err == c.GPG_ERR_NOT_SUPPORTED) {
-              return beam.make_error_term(env, 190);
-          }
-          std.log.err("ERROR {}", .{err});
-          return beam.raise_resource_error(env);
-      }
-      return 0;
-
-      }
   }
 
   /// nif: delete_key/2
@@ -281,15 +278,15 @@ if (err != c.GPG_ERR_NO_ERROR) {
       while (err == c.GPG_ERR_NO_ERROR) {
           err = c.gpgme_op_keylist_next(context.context, &key);
           if (err != c.GPG_ERR_NO_ERROR) {
-            // RELEASE THE POINTERS
-            c.gpgme_key_release(key);
-            break;
+              // RELEASE THE POINTERS
+              c.gpgme_key_release(key);
+              break;
           }
 
           err = c.gpgme_op_delete_ext(context.context, key, c.GPGME_DELETE_ALLOW_SECRET | c.GPGME_DELETE_FORCE);
           if (err != c.GPG_ERR_NO_ERROR) {
-            c.gpgme_key_release(key);
-            break;
+              c.gpgme_key_release(key);
+              break;
           }
 
           c.gpgme_key_release(key);

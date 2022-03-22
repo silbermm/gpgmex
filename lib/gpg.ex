@@ -15,14 +15,33 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 defmodule GPG do
   @moduledoc """
+  Native [GnuPG](https://gnupg.org/) bindings
 
-  [GnuPG](https://gnupg.org/) bindings
+  > ### Warning {: .warning}
+  >
+  > This is still a work in progress and the API is likely to 
+  > change. It is not considered producion quality yet.
+
+  > ### Warning {: .error}
+  >
+  > This has only been tested on Linux - It likely won't work for
+  > Mac OSX or Windoes yet.
 
   ## Getting Started
 
   In order to use this library, you'll need a few things on your target system
     * A working version of [gpg](https://gnupg.org/) installed
     * [gpgme c library](https://gnupg.org/related_software/gpgme/index.html)
+
+  #### Debian systems
+  ```bash
+  $ sudo aptitude install libgpg
+  ```
+
+  #### Arch systems
+  ```bash
+  $ 
+  ```
 
   """
 
@@ -73,43 +92,66 @@ defmodule GPG do
 
   @doc """
   Encrypt data for the requested email recipient
+
+  This works for any public key you have on your system.
+  If you don't have the key on your system `{:error, :keynoexist}`
+  is returned
   """
-  @spec encrypt(String.t(), binary()) :: binary() | {:error, :keynoexist}
+  @spec encrypt(String.t(), binary()) :: {:ok, binary()} | {:error, atom()}
   def encrypt(email, data) do
     create_context()
     |> GPG.NIF.encrypt(email, data)
-    |> Enum.take_while(&(&1 != 170))
-    |> to_string()
+    |> then(fn
+      {:ok, result} ->
+        data = 
+          result
+          |> Enum.take_while(&(&1 != 170))
+          |> to_string()
+        {:ok, data}
+
+      {:error, reason} ->
+        IO.inspect reason
+        {:error, :keynoexist}
+    end)
   catch
-    _e -> {:error, :keynoexist}
+    _e -> {:error, :unknown}
   end
 
   @doc """
-  Decrypt the given data. This only works if you have the
+  Decrypt the given data. 
+
+  This only works if you have the
   private key available on your system that matches the 
   public key that encrypted it
   """
-  @spec decrypt(binary()) :: binary() | :error
+  @spec decrypt(binary()) :: {:ok, binary()} | {:error, binary()}
   def decrypt(data) do
     create_context()
     |> GPG.NIF.decrypt(data)
-    |> Enum.take_while(&(&1 != 170))
-    |> to_string()
+    |> then(fn
+      {:ok, result} -> 
+        data =
+          result
+          |> Enum.take_while(&(&1 != 170))
+          |> to_string()
+        {:ok, data}
+      e -> e
+    end)
+  catch
+    e -> {:error, to_string(e)}
+  end
+
+  @doc """
+  Generate a GPG key using the provided email address
+  """
+  @spec generate_key(String.t()) :: binary() | :error
+  def generate_key(email) do
+    create_context()
+    |> GPG.NIF.generate_key(email)
   catch
     _e -> :error
   end
 
-  @doc """
-  Generate a GPG key using the provided email address 
-  """
-  @spec generate_key(String.t(), boolean()) :: binary() | :error
-  def generate_key(email, with_password) do
-    create_context()
-    |> GPG.NIF.generate_key(email, with_password)
-  catch
-    _e -> :error
-  end
-  
   @doc """
   Delete an existing GPG key
   """
