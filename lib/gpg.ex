@@ -33,16 +33,15 @@ defmodule GPG do
     * A working version of [gpg](https://gnupg.org/) installed
     * [gpgme c library](https://gnupg.org/related_software/gpgme/index.html)
 
-  #### Debian systems
-  ```bash
-  $ sudo aptitude install libgpg
-  ```
-
   #### Arch systems
   ```bash
   $ 
   ```
 
+  #### Debian like
+  ```bash
+  $ sudo apt install libgpgme-dev
+  ```
   """
 
   @doc """

@@ -16,12 +16,11 @@
 defmodule GPG.NIF do
   @moduledoc false
 
-  use Zig,
-    libs: ["/usr/lib/libgpgme.so"],
-    include: ["/usr/include"],
-    link_libc: true
+  @gpg_bin "/usr/bin/gpg"
 
-  ~Z"""
+  use Zig, link_libc: true
+
+  ~z"""
   const c = @cImport({
       @cInclude("gpgme.h");
       @cInclude("locale.h");
@@ -101,7 +100,7 @@ defmodule GPG.NIF do
       }
 
       // set engine info in our context
-      err = c.gpgme_ctx_set_engine_info(ceofcontext, c.gpgme_protocol_t.GPGME_PROTOCOL_OpenPGP, "/usr/bin/gpg2", "~/.gnupg/");
+      err = c.gpgme_ctx_set_engine_info(ceofcontext, c.gpgme_protocol_t.GPGME_PROTOCOL_OpenPGP, "#{@gpg_bin}", "~/.gnupg/");
       if (err != c.GPG_ERR_NO_ERROR) {
           std.log.err("ERROR {}", .{err});
           return beam.raise_resource_error(env);

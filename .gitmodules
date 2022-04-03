@@ -1,0 +1,3 @@
+[submodule "zigler"]
+	path = zigler
+	url = git@github.com:silbermm/zigler.git
