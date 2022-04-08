@@ -25,22 +25,60 @@ defmodule GPG do
   > ### Warning {: .error}
   >
   > This has only been tested on Linux - It likely won't work for
-  > Mac OSX or Windoes yet.
+  > Mac OSX or Windows yet.
 
   ## Getting Started
 
-  In order to use this library, you'll need a few things on your target system
-    * A working version of [gpg](https://gnupg.org/) installed
-    * [gpgme c library](https://gnupg.org/related_software/gpgme/index.html)
+  You'll need:
+  * a working version of [gpg](https://gnupg.org/) installed
+  * [gpgme c library](https://gnupg.org/related_software/gpgme/index.html)
+  * configuration added to `config.exs` 
 
-  #### Arch systems
+  ### Debian based (ubuntu, pop-os, etc)
+
+  **Installing gpg and gpgme**
+
   ```bash
-  $ 
+  $ sudo apt install gpg libgpgme-dev
   ```
 
-  #### Debian like
+  **Configuration**
+
+  Add this to `config.exs` in your app
+
+  ```elixir
+  config :zigler,
+  include: ["/usr/include/x86_64-linux-gnu", "/usr/include"],
+  libs: ["/usr/lib/x86_64-linux-gnu/libgpgme.so"]
+  ```
+
+  ### Arch based (Arch, Manjaro, etc)
+
+  **Installing gpg and gpgme**
+
   ```bash
-  $ sudo apt install libgpgme-dev
+  $ sudo pacman -Syu gpg gpgme
+  ```
+
+  **Configuration**
+
+  Add this to `config.exs` in your app
+
+  ```elixir
+  config :zigler,
+  include: ["/usr/include"],
+  libs: ["/usr/lib/libgpgme.so"]
+  ```
+
+  ## Finally
+
+  Add gpgmex to your dependencies
+  ```elixir
+  defp deps do
+    [
+      {:gpgmex, github: "silbermm/gpgmex"}
+    ]
+  end
   ```
   """
 
@@ -102,14 +140,15 @@ defmodule GPG do
     |> GPG.NIF.encrypt(email, data)
     |> then(fn
       {:ok, result} ->
-        data = 
+        data =
           result
           |> Enum.take_while(&(&1 != 170))
           |> to_string()
+
         {:ok, data}
 
       {:error, reason} ->
-        IO.inspect reason
+        IO.inspect(reason)
         {:error, :keynoexist}
     end)
   catch
@@ -128,13 +167,16 @@ defmodule GPG do
     create_context()
     |> GPG.NIF.decrypt(data)
     |> then(fn
-      {:ok, result} -> 
+      {:ok, result} ->
         data =
           result
           |> Enum.take_while(&(&1 != 170))
           |> to_string()
+
         {:ok, data}
-      e -> e
+
+      e ->
+        e
     end)
   catch
     e -> {:error, to_string(e)}

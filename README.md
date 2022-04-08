@@ -4,14 +4,53 @@ Native Elixir bindings for GnuPG.
 
 **This is in early stages of development and should be thought of as Alpha software.**
 
-## Installation
+## Getting Started
 
-This has currently only been tested on Linux.
+> This has only been tested on Linux - It likely won't work for
+> Mac OSX or Windows yet.
 
 You'll need:
-* Elixir
-* gpgme (A C library wrapper for GnuPG) version 1.16.0
-    * libgpgme.so is expected to be in `/usr/lib/`
+  * a working version of [gpg](https://gnupg.org/) installed
+  * [gpgme c library](https://gnupg.org/related_software/gpgme/index.html)
+  * configuration added to `config.exs` 
+
+### Debian based (ubuntu, pop-os, etc)
+
+**Installing gpg and gpgme**
+
+```bash
+$ sudo apt install gpg libgpgme-dev
+```
+
+**Configuration**
+
+Add this to `config.exs` in your app
+
+```elixir
+config :zigler,
+  include: ["/usr/include/x86_64-linux-gnu", "/usr/include"],
+  libs: ["/usr/lib/x86_64-linux-gnu/libgpgme.so"]
+```
+
+### Arch based (Arch, Manjaro, etc)
+
+**Installing gpg and gpgme**
+
+```bash
+$ sudo pacman -Syu gpg gpgme
+```
+
+**Configuration**
+
+Add this to `config.exs` in your app
+
+```elixir
+config :zigler,
+  include: ["/usr/include"],
+  libs: ["/usr/lib/libgpgme.so"]
+```
+
+### Finally
 
 Add gpgmex to your dependencies
 ```elixir
@@ -21,3 +60,7 @@ Add gpgmex to your dependencies
     ]
   end
 ```
+
+## Usage
+
+
