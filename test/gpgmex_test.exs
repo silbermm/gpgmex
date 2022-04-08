@@ -18,12 +18,14 @@ defmodule GPGTest do
     #   end)
     # end
 
+    @tag :integration
     test "encrypt is successful" do
       data = "This data should be encrypted"
       {:ok, cipher} = GPG.encrypt(@user_email, data)
       assert String.contains?(cipher, "-----BEGIN PGP MESSAGE-----")
     end
 
+    @tag :integration
     test "decrypt is successful" do
       data = "This data should be encrypted"
       {:ok, cipher} = GPG.encrypt(@user_email, data)
@@ -45,6 +47,7 @@ defmodule GPGTest do
     end
   end
 
+  @tag :integration
   test "gets gpg version" do
     version = GPG.get_engine_version()
     assert version == "1.17.1"
