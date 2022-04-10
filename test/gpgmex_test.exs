@@ -1,6 +1,5 @@
 defmodule GPGTest do
-  use ExUnit.Case
-  doctest GPG
+  use GPG.Case
 
   @user_email "test@test.com"
   @invalid_email "invalid@test.com"

@@ -19,7 +19,7 @@ defmodule GPG do
 
   > ### Warning {: .warning}
   >
-  > This is still a work in progress and the API is likely to 
+  > This is still a work in progress and the API is likely to
   > change. It is not considered producion quality yet.
 
   > ### Warning {: .error}
@@ -84,10 +84,15 @@ defmodule GPG do
 
   @doc """
   Get the currently installed GPG library version
+
+  ## Examples
+
+      iex> GPG.get_engine_version()
+      "1.17.1"
   """
   @spec get_engine_version() :: String.t() | :error
   def get_engine_version do
-    version = GPG.NIF.check_version()
+    version = GPG.NativeAPI.check_version()
     to_string(version)
   catch
     _e -> :error
@@ -95,12 +100,18 @@ defmodule GPG do
 
   @doc """
   Get information about the currently installed GPG library
+
+  ## Examples
+
+      iex> GPG.get_engine_info()
+      %{filename: "/usr/bin/gpg", homedir: "/home/user/.gpg"}
   """
   @spec get_engine_info() :: map() | :error
   def get_engine_info() do
-    ref = GPG.NIF.engine_info()
-    filename = GPG.NIF.get_filename(ref)
-    %{filename: to_string(filename)}
+    ref = GPG.NativeAPI.engine_info()
+    filename = GPG.NativeAPI.get_filename(ref)
+    homedir = GPG.NativeAPI.get_homedir(ref)
+    %{filename: to_string(filename), homedir: to_string(homedir)}
   catch
     _e -> :error
   end
@@ -108,19 +119,24 @@ defmodule GPG do
   @spec create_context() :: reference() | {:error, any()}
   defp create_context() do
     # must check_version before creating a context
-    _version = GPG.NIF.check_version()
-    GPG.NIF.create_context()
+    _version = GPG.NativeAPI.check_version()
+    GPG.NativeAPI.create_context()
   catch
     e -> {:error, e}
   end
 
   @doc """
   Get the public key for an email if the public key is on your system
+
+  ## Examples
+
+      iex> GPG.get_public_key("matt@silbernagel.dev")
+      "4rZSsLVhrs1JCPtRWmUl1F2q2S5+MqBjTCYkS2Rk\\nphuo6u4XQ"
   """
   @spec get_public_key(binary()) :: binary() | :error
   def get_public_key(email) do
     create_context()
-    |> GPG.NIF.public_key(email)
+    |> GPG.NativeAPI.public_key(email)
     |> Enum.take_while(&(&1 != 170))
     |> to_string()
   catch
@@ -133,11 +149,16 @@ defmodule GPG do
   This works for any public key you have on your system.
   If you don't have the key on your system `{:error, :keynoexist}`
   is returned
+
+  ## Examples
+
+      iex> GPG.encrypt("matt@silbernagel.dev", "encrypt this text")
+      {:ok, ""}
   """
   @spec encrypt(String.t(), binary()) :: {:ok, binary()} | {:error, atom()}
   def encrypt(email, data) do
     create_context()
-    |> GPG.NIF.encrypt(email, data)
+    |> GPG.NativeAPI.encrypt(email, data)
     |> then(fn
       {:ok, result} ->
         data =
@@ -165,7 +186,7 @@ defmodule GPG do
   @spec decrypt(binary()) :: {:ok, binary()} | {:error, binary()}
   def decrypt(data) do
     create_context()
-    |> GPG.NIF.decrypt(data)
+    |> GPG.NativeAPI.decrypt(data)
     |> then(fn
       {:ok, result} ->
         data =
@@ -188,7 +209,7 @@ defmodule GPG do
   @spec generate_key(String.t()) :: binary() | :error
   def generate_key(email) do
     create_context()
-    |> GPG.NIF.generate_key(email)
+    |> GPG.NativeAPI.generate_key(email)
   catch
     _e -> :error
   end
@@ -199,7 +220,7 @@ defmodule GPG do
   @spec delete_key(binary()) :: number() | :error
   def delete_key(email) do
     create_context()
-    |> GPG.NIF.delete_key(email)
+    |> GPG.NativeAPI.delete_key(email)
   catch
     _e -> :error
   end

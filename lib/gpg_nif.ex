@@ -15,6 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 defmodule GPG.NIF do
   @moduledoc false
+  @behaviour GPG.NativeAPI
 
   @gpg_bin "/usr/bin/gpg"
 
