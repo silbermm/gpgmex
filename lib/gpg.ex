@@ -109,7 +109,9 @@ defmodule GPG do
   @spec get_engine_info() :: map() | :error
   def get_engine_info() do
     ref = GPG.NativeAPI.engine_info()
+    IO.inspect ref
     filename = GPG.NativeAPI.get_filename(ref)
+    IO.inspect filename
     homedir = GPG.NativeAPI.get_homedir(ref)
     %{filename: to_string(filename), homedir: to_string(homedir)}
   catch

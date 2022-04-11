@@ -19,7 +19,10 @@ defmodule GPG.NIF do
 
   @gpg_bin "/usr/bin/gpg"
 
-  use Zig, link_libc: true
+  use Zig, 
+    include: ["/usr/include"],
+    libs: ["/usr/lib/libgpgme.so"],
+    link_libc: true
 
   ~z"""
   const c = @cImport({
