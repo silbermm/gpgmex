@@ -53,7 +53,6 @@ defmodule GPGTest do
   end
 
   test "gets engine info" do
-    res = GPG.get_engine_info()
-    IO.inspect res
+    assert GPG.get_engine_info().filename == "/usr/bin/gpg"
   end
 end

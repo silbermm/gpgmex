@@ -104,16 +104,13 @@ defmodule GPG do
   ## Examples
 
       iex> GPG.get_engine_info()
-      %{filename: "/usr/bin/gpg", homedir: "/home/user/.gpg"}
+      %{filename: "/usr/bin/gpg"}
   """
   @spec get_engine_info() :: map() | :error
   def get_engine_info() do
     ref = GPG.NativeAPI.engine_info()
-    IO.inspect ref
     filename = GPG.NativeAPI.get_filename(ref)
-    IO.inspect filename
-    homedir = GPG.NativeAPI.get_homedir(ref)
-    %{filename: to_string(filename), homedir: to_string(homedir)}
+    %{filename: to_string(filename)}
   catch
     _e -> :error
   end
@@ -170,8 +167,7 @@ defmodule GPG do
 
         {:ok, data}
 
-      {:error, reason} ->
-        IO.inspect(reason)
+      {:error, _reason} ->
         {:error, :keynoexist}
     end)
   catch

@@ -70,6 +70,8 @@ defmodule GPG.NIF do
       var resource_homedir = beam.allocator.alloc(u8, 64) catch return beam.raise_enomem(env);
       errdefer beam.allocator.free(resource_homedir);
 
+      std.log.err("INFO {}", .{enginfo.*});
+
       return __resource__.create(engine_info_struct, env, .{
           .filename = enginfo.*.file_name,
           .homedir = enginfo.*.home_dir,
