@@ -2,37 +2,37 @@ defmodule GPG.NativeAPI do
   @moduledoc false
 
   @doc "Returns the version of GPG on the users system"
-  @callback check_version :: binary()
+  @callback check_version :: any()
 
   @doc "Is OpenPGP supported on the users system"
-  @callback check_openpgp_supported() :: boolean()
+  @callback check_openpgp_supported() :: any()
 
   @doc "Returns info about PGP on the users system"
-  @callback engine_info() :: reference()
+  @callback engine_info() :: any()
 
   @doc "Return the filename from engine_info"
-  @callback get_filename(reference()) :: binary()
+  @callback get_filename(reference()) :: any()
 
   @doc "Return the homedir from engine_info"
-  @callback get_homedir(reference()) :: binary()
+  @callback get_homedir(reference()) :: any()
 
   @doc "Creates a reference to the GPG context"
-  @callback create_context() :: reference()
+  @callback create_context() :: any()
 
   @doc "Encrypt some text"
-  @callback encrypt(reference(), binary(), binary()) :: {:ok, binary()} | {:error, binary()}
+  @callback encrypt(reference(), binary(), binary()) :: any()
 
   @doc "Decrypt some encrypted text"
-  @callback decrypt(reference(), binary()) :: {:ok, binary()} | {:error, binary()}
+  @callback decrypt(reference(), binary()) :: any()
 
   @doc "Get your public key"
-  @callback public_key(reference(), binary()) :: binary()
+  @callback public_key(reference(), binary()) :: any()
 
   @doc "Generate a key"
-  @callback generate_key(reference(), binary()) :: integer()
+  @callback generate_key(reference(), binary()) :: any()
 
   @doc "Delete a key"
-  @callback delete_key(reference(), binary()) :: integer()
+  @callback delete_key(reference(), binary()) :: any()
 
 
   defp impl, do: Application.get_env(:gpgmex, :native_api, GPG.NIF)
