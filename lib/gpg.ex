@@ -152,7 +152,7 @@ defmodule GPG do
   ## Examples
 
       iex> GPG.encrypt("matt@silbernagel.dev", "encrypt this text")
-      {:ok, ""}
+      {:ok, "-----BEGIN PGP MESSAGE-----\\n\\nhQIMA1M1Dqrc4va7AQ/"}
   """
   @spec encrypt(String.t(), binary()) :: {:ok, binary()} | {:error, atom()}
   def encrypt(email, data) do
@@ -175,11 +175,16 @@ defmodule GPG do
   end
 
   @doc """
-  Decrypt the given data. 
+  Decrypt the given data.
 
   This only works if you have the
   private key available on your system that matches the 
   public key that encrypted it
+
+  ## Examples
+
+      iex> GPG.decrypt("-----BEGIN PGP MESSAGE-----\\n\\nww8K2o8JL1ejKjJSOte0RmhLl6V7M6KW7p9D4Y1zHobTxVnGlmW64wxuWJx03Xs5\\nqymK+m7aUrAO0HL3vri3R2z1SisrUAeAtI/4v3GUWA00g4Q0rPzibDe3m53VkY7/\\nlyAzJSXL29LL93IJezx53GRK9+RYSBULYWLI3NPX10zidwKbnz+8jo41TIOx0SNh\\nt6aAyErC4pnepy7xq7IdWzSe/7v+lrcYpyGT35jyeR+e4N7N7SJV/+WQ+RxBQ/TS\\nPwHkMaec6aIgfLTt/lCryJFPEv02C5v0JQg8jJ7SjSH2FOk1y4HPIOJC/qatlLZq\\ntDiu13SA0+UBilW1j4AhXA==\\n=CXnG\\n-----END PGP MESSAGE-----\\n")
+      {:ok, "data"}
   """
   @spec decrypt(binary()) :: {:ok, binary()} | {:error, binary()}
   def decrypt(data) do
@@ -202,9 +207,17 @@ defmodule GPG do
   end
 
   @doc """
-  Generate a GPG key using the provided email address
+  Generate a GPG key using the provided email address.
+
+  This generates a new GPG using rsa3072 encryption. It will
+  use the system prompt to ask for a password.
+
+  ## Examples
+
+      iex> GPG.generate_key("my_new@email.com")
+      :ok
   """
-  @spec generate_key(String.t()) :: binary() | :error
+  @spec generate_key(String.t()) :: :ok | :error
   def generate_key(email) do
     create_context()
     |> GPG.NativeAPI.generate_key(email)

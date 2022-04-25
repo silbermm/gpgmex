@@ -1,4 +1,5 @@
 defmodule GPG.Case do
+  @moduledoc false
   use ExUnit.CaseTemplate
 
   setup _ do

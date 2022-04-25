@@ -19,10 +19,7 @@ defmodule GPG.NIF do
 
   @gpg_bin "/usr/bin/gpg"
 
-  use Zig, 
-    include: ["/usr/include"],
-    libs: ["/usr/lib/libgpgme.so"],
-    link_libc: true
+  use Zig, link_libc: true
 
   ~z"""
   const c = @cImport({
@@ -69,8 +66,6 @@ defmodule GPG.NIF do
 
       var resource_homedir = beam.allocator.alloc(u8, 64) catch return beam.raise_enomem(env);
       errdefer beam.allocator.free(resource_homedir);
-
-      std.log.err("INFO {}", .{enginfo.*});
 
       return __resource__.create(engine_info_struct, env, .{
           .filename = enginfo.*.file_name,
@@ -185,13 +180,11 @@ defmodule GPG.NIF do
       var decrypted: c.gpgme_data_t = undefined;
       err = c.gpgme_data_new(&decrypted);
       if (err != c.GPG_ERR_NO_ERROR) {
-          std.log.err("unable to build data obj {}", .{err});
           return beam.make_error_binary(env, "unable to build data object");
       }
 
       err = c.gpgme_op_decrypt(context.context, cipher, decrypted);
       if (err != c.GPG_ERR_NO_ERROR) {
-          std.log.err("unable to decrpyt {}", .{err});
           return beam.make_error_binary(env, "unable to decrypt cipher");
       }
 

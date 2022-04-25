@@ -1,7 +1,7 @@
 defmodule GPGDocTest do
   use GPG.Case
   doctest GPG
-  
+
   import Mox
 
 
@@ -21,10 +21,24 @@ defmodule GPGDocTest do
     end)
 
     expect(GPG.MockNativeAPI, :encrypt, fn ^ctx, "matt@silbernagel.dev", _txt ->
-      {:ok, []}
+      {:ok,  [45, 45, 45, 45, 45, 66, 69, 71, 73, 78, 32, 80, 71, 80, 32, 77, 69, 83, 83,
+  65, 71, 69, 45, 45, 45, 45, 45, 10, 10, 104, 81, 73, 77, 65, 49, 77, 49, 68,
+  113, 114, 99, 52, 118, 97, 55, 65, 81, 47]}
     end)
+
+    expect(GPG.MockNativeAPI, :encrypt, fn ^ctx, "noton@mysystem.com", _txt ->
+      {:error, :any_reason}
+    end)
+
+    expect(GPG.MockNativeAPI, :decrypt, fn ^ctx, _data ->
+    {:ok,  [100, 97, 116, 97, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170, 170]}
+    end)
+
+
+    expect(GPG.MockNativeAPI, :generate_key, fn ^ctx, _email ->
+      :ok
+    end)
+
     :ok
   end
-
-
 end

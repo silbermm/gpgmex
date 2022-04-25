@@ -34,7 +34,6 @@ defmodule GPG.NativeAPI do
   @doc "Delete a key"
   @callback delete_key(reference(), binary()) :: any()
 
-
   defp impl, do: Application.get_env(:gpgmex, :native_api, GPG.NIF)
 
   def check_version(), do: impl().check_version()
