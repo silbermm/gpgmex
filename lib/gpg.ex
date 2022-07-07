@@ -47,9 +47,9 @@ defmodule GPG do
   Add this to `config.exs` in your app
 
   ```elixir
-  config :zigler,
-  include: ["/usr/include/x86_64-linux-gnu", "/usr/include"],
-  libs: ["/usr/lib/x86_64-linux-gnu/libgpgme.so"]
+  config :gpgmex,
+    include_dir: ["/usr/include/x86_64-linux-gnu", "/usr/include"],
+    lib_dir: ["/usr/lib/x86_64-linux-gnu/libgpgme.so"]
   ```
 
   ### Arch based (Arch, Manjaro, etc)
@@ -65,18 +65,18 @@ defmodule GPG do
   Add this to `config.exs` in your app
 
   ```elixir
-  config :zigler,
-  include: ["/usr/include"],
-  libs: ["/usr/lib/libgpgme.so"]
+  config :gpgmex,
+    include_dir: ["/usr/include"],
+    lib_dir: ["/usr/lib/libgpgme.so"]
   ```
 
-  ## Finally
+  ## Add to your Dependencies
 
   Add gpgmex to your dependencies
   ```elixir
   defp deps do
     [
-      {:gpgmex, github: "silbermm/gpgmex"}
+      {:gpgmex, "~> 0.0.1"}
     ]
   end
   ```
