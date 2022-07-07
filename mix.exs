@@ -37,8 +37,9 @@ defmodule GPGMEx.MixProject do
 
   defp deps do
     [
-      {:zigler, github: "silbermm/zigler", tag: "v0.8.3", runtime: false},
+      #{:zigler, github: "silbermm/zigler", tag: "v0.8.3", runtime: false},
       #{:zigler, path: "../zigler", runtime: false},
+      {:zigler, "~> 0.9.1", runtime: false},
       {:ex_doc, "~> 0.27.1", runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev, :devci], runtime: false},
       {:credo, "~> 1.6", only: [:dev, :test, :ci], runtime: false},

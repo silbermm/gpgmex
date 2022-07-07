@@ -167,7 +167,8 @@ defmodule GPG do
 
         {:ok, data}
 
-      {:error, _reason} ->
+      {:error, reason} ->
+        IO.inspect reason
         {:error, :keynoexist}
     end)
   catch

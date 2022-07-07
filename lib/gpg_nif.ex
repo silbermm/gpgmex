@@ -19,8 +19,7 @@ defmodule GPG.NIF do
 
   @gpg_bin "/usr/bin/gpg"
 
-  use Zig,
-    link_libc: true
+  use GPG.ZigSupport
 
   ~z"""
   const c = @cImport({
@@ -36,8 +35,8 @@ defmodule GPG.NIF do
   }
 
   /// nif: check_openpgp_supported/0
-  fn check_openpgp_supported(env: beam.env) bool {
-      var err = c.gpgme_engine_check_version(c.gpgme_protocol_t.GPGME_PROTOCOL_OpenPGP);
+  fn check_openpgp_supported() bool {
+      var err = c.gpgme_engine_check_version(c.GPGME_PROTOCOL_OpenPGP);
       if (err != c.GPG_ERR_NO_ERROR) {
           return false;
       }
@@ -96,13 +95,13 @@ defmodule GPG.NIF do
           return beam.raise_resource_error(env);
       }
 
-      err = c.gpgme_set_protocol(ceofcontext, c.gpgme_protocol_t.GPGME_PROTOCOL_OpenPGP);
+      err = c.gpgme_set_protocol(ceofcontext, c.GPGME_PROTOCOL_OpenPGP);
       if (err != c.GPG_ERR_NO_ERROR) {
           return beam.raise_resource_error(env);
       }
 
       // set engine info in our context
-      err = c.gpgme_ctx_set_engine_info(ceofcontext, c.gpgme_protocol_t.GPGME_PROTOCOL_OpenPGP, "#{@gpg_bin}", "~/.gnupg/");
+      err = c.gpgme_ctx_set_engine_info(ceofcontext, c.GPGME_PROTOCOL_OpenPGP, "#{@gpg_bin}", "~/.gnupg/");
       if (err != c.GPG_ERR_NO_ERROR) {
           std.log.err("ERROR {}", .{err});
           return beam.raise_resource_error(env);
@@ -141,7 +140,7 @@ defmodule GPG.NIF do
           err = c.gpgme_data_new_from_mem(&to_encrypt, text.ptr, text.len, 0);
           var keys = [_]c.gpgme_key_t{ key, null };
 
-          err = c.gpgme_op_encrypt(context.context, &keys, c.gpgme_encrypt_flags_t.GPGME_ENCRYPT_ALWAYS_TRUST, to_encrypt, cipher);
+          err = c.gpgme_op_encrypt(context.context, &keys, c.GPGME_ENCRYPT_ALWAYS_TRUST, to_encrypt, cipher);
           if (err != c.GPG_ERR_NO_ERROR) {
             _ = c.gpgme_op_keylist_end(context.context);
             c.gpgme_data_release(cipher);
@@ -152,7 +151,7 @@ defmodule GPG.NIF do
 
           // READ THE ENCRYPTED DATA
           var d: [c.SIZE]u8 = undefined;
-          var read_bytes = c.gpgme_data_seek(cipher, 0, c.SEEK_SET);
+          _ = c.gpgme_data_seek(cipher, 0, c.SEEK_SET);
           var read_new_bytes_2 = c.gpgme_data_read(cipher, &d, c.SIZE);
           while (read_new_bytes_2 > 0) {
               read_new_bytes_2 = c.gpgme_data_read(cipher, &d, c.SIZE);
@@ -191,7 +190,7 @@ defmodule GPG.NIF do
 
       // READ THE ENCRYPTED DATA
       var d: [c.SIZE]u8 = undefined;
-      var read_bytes = c.gpgme_data_seek(decrypted, 0, c.SEEK_SET);
+      _ = c.gpgme_data_seek(decrypted, 0, c.SEEK_SET);
       var read_new_bytes_2 = c.gpgme_data_read(decrypted, &d, c.SIZE);
       while (read_new_bytes_2 > 0) {
           read_new_bytes_2 = c.gpgme_data_read(decrypted, &d, c.SIZE);
@@ -216,7 +215,7 @@ defmodule GPG.NIF do
           return beam.raise_resource_error(env);
       }
 
-      err = c.gpgme_data_set_encoding(data, c.gpgme_data_encoding_t.GPGME_DATA_ENCODING_ARMOR);
+      err = c.gpgme_data_set_encoding(data, c.GPGME_DATA_ENCODING_ARMOR);
       if (err != c.GPG_ERR_NO_ERROR) {
           return beam.raise_resource_error(env);
       }
