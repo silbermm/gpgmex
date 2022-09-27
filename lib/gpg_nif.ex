@@ -294,5 +294,24 @@ defmodule GPG.NIF do
       c.gpgme_key_release(key);
       return 1;
   }
+
+  /// nif: import_key/2
+  fn import_key(env: beam.env, res: beam.term, data: []u8) beam.term {
+      var context = __resource__.fetch(context_struct, env, res) catch return beam.raise_resource_error(env);
+
+      var cipher: c.gpgme_data_t = undefined;
+      var err = c.gpgme_data_new_from_mem(&cipher, data.ptr, data.len, 0);
+
+      if (err != c.GPG_ERR_NO_ERROR) {
+          return beam.make_error_binary(env, "invalid key");
+      }
+
+      err = c.gpgme_op_import(context.context, cipher);
+      if (err != c.GPG_ERR_NO_ERROR) {
+          return beam.make_error_binary(env, "unable to import the key");
+      }
+
+      return beam.make_ok(env);
+  }
   """
 end

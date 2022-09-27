@@ -29,7 +29,7 @@ Add this to `config.exs` in your app
 ```elixir
 config :gpgmex,
   include_dir: ["/usr/include/x86_64-linux-gnu", "/usr/include"],
-  lib_dir: ["/usr/lib/x86_64-linux-gnu/libgpgme.so"]
+  libs_dir: ["/usr/lib/x86_64-linux-gnu/libgpgme.so"]
 ```
 
 ### Arch based (Arch, Manjaro, etc)
@@ -47,7 +47,7 @@ Add this to `config.exs` in your app
 ```elixir
 config :gpgmex,
   include_dir: ["/usr/include"],
-  lib_dir: ["/usr/lib/libgpgme.so"]
+  libs_dir: ["/usr/lib/libgpgme.so"]
 ```
 
 ### Finally
