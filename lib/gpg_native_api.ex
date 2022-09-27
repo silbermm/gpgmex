@@ -34,6 +34,9 @@ defmodule GPG.NativeAPI do
   @doc "Delete a key"
   @callback delete_key(reference(), binary()) :: any()
 
+  @doc "Import a key"
+  @callback import_key(reference(), binary()) :: any() 
+
   defp impl, do: Application.get_env(:gpgmex, :native_api, GPG.NIF)
 
   def check_version(), do: impl().check_version()
@@ -47,4 +50,5 @@ defmodule GPG.NativeAPI do
   def public_key(ref, email), do: impl().public_key(ref, email)
   def generate_key(ref, email), do: impl().generate_key(ref, email)
   def delete_key(ref, email), do: impl().delete_key(ref, email)
+  def import_key(ref, data), do: impl().import_key(ref, data)
 end

@@ -235,4 +235,13 @@ defmodule GPG do
   catch
     _e -> :error
   end
+
+  @doc """
+  Import a public key
+  """
+  @spec import_key(binary()) :: :ok | {:error, binary()}
+  def import_key(data) do
+    create_context()
+    |> GPG.NativeAPI.import_key(data)
+  end
 end
