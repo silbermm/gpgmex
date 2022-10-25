@@ -17,7 +17,8 @@ defmodule GPG.NIF do
   @moduledoc false
   @behaviour GPG.NativeAPI
 
-  @gpg_bin "/usr/bin/gpg"
+  @gpg_bin Application.compile_env(:gpgmex, :gpg_bin, "/usr/bin/gpg")
+  @gpg_home Application.compile_env(:gpgmex, :gpg_home, "~/.gnupg")
 
   use GPG.ZigSupport
 
@@ -101,7 +102,7 @@ defmodule GPG.NIF do
       }
 
       // set engine info in our context
-      err = c.gpgme_ctx_set_engine_info(ceofcontext, c.GPGME_PROTOCOL_OpenPGP, "#{@gpg_bin}", "~/.gnupg/");
+      err = c.gpgme_ctx_set_engine_info(ceofcontext, c.GPGME_PROTOCOL_OpenPGP, "#{@gpg_bin}", "#{@gpg_home}");
       if (err != c.GPG_ERR_NO_ERROR) {
           std.log.err("ERROR {}", .{err});
           return beam.raise_resource_error(env);
