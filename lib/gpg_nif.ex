@@ -118,56 +118,58 @@ defmodule GPG.NIF do
 
   /// Encrypt data
   /// nif: encrypt/3
-  fn encrypt(env: beam.env, res: beam.term, email: []u8, text: []u8) beam.term {
-      var context = __resource__.fetch(context_struct, env, res) catch return beam.raise_resource_error(env);
+  fn encrypt(env: beam.env, res: beam.term, email: beam.term, text: []u8) !beam.term {
+    var context = __resource__.fetch(context_struct, env, res) catch return beam.raise_resource_error(env);
+    var key: c.gpgme_key_t = undefined;
 
-      var key: c.gpgme_key_t = undefined;
-      var err = c.gpgme_op_keylist_start(context.context, email.ptr, 0);
-      while (err == c.GPG_ERR_NO_ERROR) {
-          err = c.gpgme_op_keylist_next(context.context, &key);
-          if (err != c.GPG_ERR_NO_ERROR) {
+    var email_str = try beam.get_c_string(env, email);
 
-            _ = c.gpgme_op_keylist_end(context.context);
-            c.gpgme_key_release(key);
-            c.gpgme_release(context.context);
+    var err = c.gpgme_op_keylist_start(context.context, email_str, 0);
+    while (err == c.GPG_ERR_NO_ERROR) {
+        err = c.gpgme_op_keylist_next(context.context, &key);
+        if (err != c.GPG_ERR_NO_ERROR) {
+           _ = c.gpgme_op_keylist_end(context.context);
+           c.gpgme_key_release(key);
+           c.gpgme_release(context.context);
+           std.log.err("GPG error getting key - {}", .{err});
+           return beam.make_error_atom(env, "keynoexist");
+        }
+        _ = c.gpgme_op_keylist_end(context.context);
 
-            return beam.make_error_binary(env, "error retrieving key");
-          }
+        var cipher: c.gpgme_data_t = undefined;
+        err = c.gpgme_data_new(&cipher);
+        var to_encrypt: c.gpgme_data_t = undefined;
 
-          var cipher: c.gpgme_data_t = undefined;
-          err = c.gpgme_data_new(&cipher);
-          var to_encrypt: c.gpgme_data_t = undefined;
+        err = c.gpgme_data_new_from_mem(&to_encrypt, text.ptr, text.len, 0);
+        var keys = [_]c.gpgme_key_t{ key, null };
 
-          err = c.gpgme_data_new_from_mem(&to_encrypt, text.ptr, text.len, 0);
-          var keys = [_]c.gpgme_key_t{ key, null };
-
-          err = c.gpgme_op_encrypt(context.context, &keys, c.GPGME_ENCRYPT_ALWAYS_TRUST, to_encrypt, cipher);
-          if (err != c.GPG_ERR_NO_ERROR) {
-            _ = c.gpgme_op_keylist_end(context.context);
-            c.gpgme_data_release(cipher);
-            c.gpgme_key_release(key);
-            c.gpgme_release(context.context);
-            return beam.make_error_binary(env, "error encrypting the data");
-          }
-
-          // READ THE ENCRYPTED DATA
-          var d: [c.SIZE]u8 = undefined;
-          _ = c.gpgme_data_seek(cipher, 0, c.SEEK_SET);
-          var read_new_bytes_2 = c.gpgme_data_read(cipher, &d, c.SIZE);
-          while (read_new_bytes_2 > 0) {
-              read_new_bytes_2 = c.gpgme_data_read(cipher, &d, c.SIZE);
-          }
-
-          _ = c.gpgme_op_keylist_end(context.context);
-          c.gpgme_data_release(to_encrypt);
+        err = c.gpgme_op_encrypt(context.context, &keys, c.GPGME_ENCRYPT_ALWAYS_TRUST, to_encrypt, cipher);
+        if (err != c.GPG_ERR_NO_ERROR) {
           c.gpgme_data_release(cipher);
           c.gpgme_key_release(key);
           c.gpgme_release(context.context);
 
-          const buf_slice = d[0..];
-          return beam.make_ok_term(env, beam.make_cstring_charlist(env, buf_slice));
-      }
-      return beam.make_error_binary(env, "key not found");
+          std.log.err("GPG error encrypting - {}", .{err});
+          return beam.make_error_atom(env, "noencrypt");
+        }
+
+        // READ THE ENCRYPTED DATA
+        var d: [c.SIZE]u8 = undefined;
+        _ = c.gpgme_data_seek(cipher, 0, c.SEEK_SET);
+        var read_new_bytes_2 = c.gpgme_data_read(cipher, &d, c.SIZE);
+        while (read_new_bytes_2 > 0) {
+            read_new_bytes_2 = c.gpgme_data_read(cipher, &d, c.SIZE);
+        }
+
+        c.gpgme_data_release(to_encrypt);
+        c.gpgme_data_release(cipher);
+        c.gpgme_key_release(key);
+        c.gpgme_release(context.context);
+
+        const buf_slice = d[0..];
+        return beam.make_ok_term(env, beam.make_cstring_charlist(env, buf_slice));
+    }
+    return beam.make_error_atom(env, "errunknown");
   }
 
   /// Decrypt data
@@ -301,16 +303,22 @@ defmodule GPG.NIF do
       var context = __resource__.fetch(context_struct, env, res) catch return beam.raise_resource_error(env);
 
       var cipher: c.gpgme_data_t = undefined;
+      //var result: c.gpgme_import_result_t = undefined;
+
       var err = c.gpgme_data_new_from_mem(&cipher, data.ptr, data.len, 0);
 
       if (err != c.GPG_ERR_NO_ERROR) {
-          return beam.make_error_binary(env, "invalid key");
+          return beam.make_error_atom(env, "invalidkey");
       }
 
       err = c.gpgme_op_import(context.context, cipher);
       if (err != c.GPG_ERR_NO_ERROR) {
-          return beam.make_error_binary(env, "unable to import the key");
+          return beam.make_error_binary(env, "failedimport");
       }
+
+      // TODO: return the fingerprint of the key
+      //result = c.gpgme_op_import_result(context.context)
+      //var imports: c.gpgme_import_status_t = result.imports
 
       return beam.make_ok(env);
   }
