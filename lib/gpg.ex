@@ -167,8 +167,9 @@ defmodule GPG do
 
         {:ok, data}
 
-      e -> e 
-      end)
+      e ->
+        e
+    end)
   catch
     _e -> {:error, :unknown}
   end

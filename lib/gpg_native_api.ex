@@ -35,9 +35,9 @@ defmodule GPG.NativeAPI do
   @callback delete_key(reference(), binary()) :: any()
 
   @doc "Import a key"
-  @callback import_key(reference(), binary()) :: any() 
+  @callback import_key(reference(), binary()) :: any()
 
-  defp impl, do: Application.get_env(:gpgmex, :native_api, GPG.NIF)
+  defp impl, do: Application.get_env(:gpgmex, :native_api)
 
   def check_version(), do: impl().check_version()
   def check_openpgp_supported(), do: impl().check_openpgp_supported()
