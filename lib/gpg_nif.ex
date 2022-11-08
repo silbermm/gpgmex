@@ -118,13 +118,11 @@ defmodule GPG.NIF do
 
   /// Encrypt data
   /// nif: encrypt/3
-  fn encrypt(env: beam.env, res: beam.term, email: beam.term, text: []u8) !beam.term {
+  fn encrypt(env: beam.env, res: beam.term, email: []u8, text: []u8) !beam.term {
     var context = __resource__.fetch(context_struct, env, res) catch return beam.raise_resource_error(env);
     var key: c.gpgme_key_t = undefined;
 
-    var email_str = try beam.get_c_string(env, email);
-
-    var err = c.gpgme_op_keylist_start(context.context, email_str, 0);
+    var err = c.gpgme_op_keylist_start(context.context, email.ptr, 0);
     while (err == c.GPG_ERR_NO_ERROR) {
         err = c.gpgme_op_keylist_next(context.context, &key);
         if (err != c.GPG_ERR_NO_ERROR) {
