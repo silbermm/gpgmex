@@ -1,0 +1,14 @@
+[package]
+name = "gpg_nif_rust"
+version = "0.1.0"
+authors = []
+edition = "2018"
+
+[lib]
+name = "gpg_nif_rust"
+path = "src/lib.rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+gpgme = "0.11.0"
+rustler = "0.26.0"
