@@ -22,7 +22,7 @@ defmodule GPG.NIF.Rust do
   def create_context(), do: :erlang.nif_error(:nif_not_loaded)
 
   @impl true
-  def encrypt(_ref, _email, _data), do: :erlang.nif_error(:nif_not_loaded)
+  def encrypt(_email, _data), do: :erlang.nif_error(:nif_not_loaded)
 
   @impl true
   def decrypt(_ref, _data), do: :erlang.nif_error(:nif_not_loaded)
