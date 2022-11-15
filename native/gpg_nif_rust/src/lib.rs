@@ -1,14 +1,11 @@
-use gpgme::{Context, EncryptFlags, Key, Protocol};
-use rustler::NifStruct;
-use rustler::{Atom, Error};
+use gpgme::{Context, Data, EncryptFlags, Key, Protocol};
+use rustler::{Atom, Error, NifMap, NifTuple};
 
 mod atoms {
     rustler::atoms! {
         ok,
         error,
-        eof,
-        ectx,
-        unknown // Other error
+        unknown
     }
 }
 
@@ -30,51 +27,34 @@ fn check_openpgp_supported() -> bool {
     }
 }
 
-#[derive(NifStruct)]
-#[module = "GPG.NIF.Rust.EngineInfo"]
-struct EngineInfo {
+#[derive(NifMap)]
+struct LocalEngineInfo {
     pub directory: String,
     pub bin: String,
-    pub err: String,
 }
 
 #[rustler::nif]
-fn engine_info() -> EngineInfo {
-    let gpgme = gpgme::init();
-    let engine_info = gpgme.engine_info();
-
-    match engine_info {
-        Ok(v) => EngineInfo {
-            directory: match v.get(Protocol::OpenPgp) {
-                None => "not found".to_string(),
-                Some(v) => match v.home_dir() {
-                    Ok(path) => path.to_string(),
-                    Err(_) => "invalid".to_string(),
-                },
-            },
-            bin: match v.get(Protocol::OpenPgp) {
-                None => "not found".to_string(),
-                Some(v) => match v.path() {
-                    Ok(path) => path.to_string(),
-                    Err(_) => "invalid".to_string(),
-                },
-            },
-            err: "".to_string(),
+fn engine_info(home_dir: String, path: String) -> Result<LocalEngineInfo, Error> {
+    let ctx = get_context(home_dir, path)?;
+    let engine_info = ctx.engine_info();
+    Ok(LocalEngineInfo {
+        directory: match engine_info.home_dir() {
+            Ok(h) => h.to_string(),
+            Err(_reason) => "not found".to_string(),
         },
-        Err(e) => EngineInfo {
-            directory: "".to_string(),
-            bin: "".to_string(),
-            err: e.to_string(),
+        bin: match engine_info.path() {
+            Err(_reason) => "not found".to_string(),
+            Ok(path) => path.to_string(),
         },
-    }
+    })
 }
 
-fn get_context() -> Result<Context, Error> {
+fn get_context(home_dir: String, path: String) -> Result<Context, Error> {
     match Context::from_protocol(Protocol::OpenPgp) {
         Err(_reason) => Err(Error::Term(Box::new(atoms::error()))),
         Ok(mut ctx) => {
             ctx.set_armor(true);
-            match ctx.set_engine_info(Some("/usr/bin/gpg"), Some("~/.gnupg")) {
+            match ctx.set_engine_info(Some(path), Some(home_dir)) {
                 Ok(_) => Ok(ctx),
                 Err(reason) => Err(Error::Term(Box::new(reason.to_string()))),
             }
@@ -82,33 +62,87 @@ fn get_context() -> Result<Context, Error> {
     }
 }
 
-fn find_keys(ctx: &mut Context, keys: Vec<String>) -> Result<Vec<Key>, Error> {
-    match ctx.find_keys(keys) {
+fn find_key(ctx: &mut Context, key: String) -> Result<Key, Error> {
+    match ctx.locate_key(key) {
         Err(reason) => Err(Error::Term(Box::new(reason.to_string()))),
-        Ok(valid_keys) => Ok(valid_keys
-            .filter_map(|x| x.ok())
-            .filter(|k| k.can_encrypt())
-            .collect()),
+        Ok(valid_key) => Ok(valid_key),
+    }
+}
+
+#[derive(NifTuple)]
+struct OkTuple {
+    ok: Atom,
+    values: String,
+}
+
+#[rustler::nif]
+fn encrypt(email: String, data: String, home_dir: String, path: String) -> Result<OkTuple, Error> {
+    let mut ctx = get_context(home_dir, path)?;
+
+    let key: Key = find_key(&mut ctx, email)?;
+
+    let mut output = Vec::new();
+
+    match ctx.encrypt_with_flags(Some(&key), data, &mut output, EncryptFlags::ALWAYS_TRUST) {
+        Ok(..) => match String::from_utf8(output) {
+            Ok(s) => Ok(OkTuple {
+                ok: atoms::ok(),
+                values: s.to_string(),
+            }),
+            Err(e) => Err(Error::Term(Box::new(e.to_string()))),
+        },
+        Err(reason) => Err(Error::Term(Box::new(reason.to_string()))),
     }
 }
 
 #[rustler::nif]
-fn encrypt(email: String, data: String) -> Result<Vec<u8>, Error> {
-    let mut ctx = get_context()?;
-
-    let key_input = vec![email];
-    let keys: Vec<Key> = find_keys(&mut ctx, key_input)?;
+fn decrypt(data: String, home_dir: String, path: String) -> Result<OkTuple, Error> {
+    let mut ctx = get_context(home_dir, path)?;
     let mut output = Vec::new();
 
-    match ctx.encrypt_with_flags(&keys, data, &mut output, EncryptFlags::ALWAYS_TRUST) {
-        Ok(..) => Ok(output),
-        Err(reason) => {
-            Err(Error::Term(Box::new(reason.to_string())))
+    match ctx.decrypt(data, &mut output) {
+        Ok(..) => match String::from_utf8(output) {
+            Ok(s) => Ok(OkTuple {
+                ok: atoms::ok(),
+                values: s.to_string(),
+            }),
+            Err(e) => Err(Error::Term(Box::new(e.to_string()))),
+        },
+        Err(reason) => Err(Error::Term(Box::new(reason.to_string()))),
+    }
+}
+
+#[rustler::nif]
+fn import_key(key: String, home_dir: String, path: String) -> Result<OkTuple, Error> {
+    let mut ctx = get_context(home_dir, path)?;
+
+    match Data::from_bytes(key) {
+        Ok(mut data_mem) => {
+            // let d = ctx.read_keys(&mut data_mem).unwrap();
+            //for key in d {
+            let import_result = ctx.import(&mut data_mem);
+            return match import_result {
+                Ok(import_key) => Ok(OkTuple {
+                    ok: atoms::ok(),
+                    values: import_key.imported().to_string(),
+                }),
+                Err(e) => Err(Error::Term(Box::new(e.to_string()))),
+            };
+            //}
+            //return Err(Error::Term(Box::new("invalid".to_string())));
         }
+        Err(reason) => Err(Error::Term(Box::new(reason.to_string()))),
     }
 }
 
 rustler::init!(
     "Elixir.GPG.NIF.Rust",
-    [check_version, check_openpgp_supported, engine_info, encrypt]
+    [
+        check_version,
+        check_openpgp_supported,
+        engine_info,
+        encrypt,
+        decrypt,
+        import_key
+    ]
 );
