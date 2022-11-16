@@ -1,11 +1,11 @@
 [package]
-name = "gpg_nif_rust"
+name = "gpg_rust_nif"
 version = "0.1.0"
 authors = []
 edition = "2018"
 
 [lib]
-name = "gpg_nif_rust"
+name = "gpg_rust_nif"
 path = "src/lib.rs"
 crate-type = ["cdylib"]
 

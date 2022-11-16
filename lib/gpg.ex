@@ -104,13 +104,11 @@ defmodule GPG do
   ## Examples
 
       iex> GPG.get_engine_info()
-      %{filename: "/usr/bin/gpg"}
+      %{bin: "/usr/bin/gpg", directory: "~/.gnupg"}
   """
   @spec get_engine_info() :: map() | :error
   def get_engine_info() do
-    ref = GPG.NativeAPI.engine_info()
-    filename = GPG.NativeAPI.get_filename(ref)
-    %{filename: to_string(filename)}
+    GPG.NativeAPI.engine_info()
   catch
     _e -> :error
   end

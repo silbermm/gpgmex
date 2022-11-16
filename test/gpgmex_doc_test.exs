@@ -8,7 +8,11 @@ defmodule GPGDocTest do
     ref = make_ref()
     ctx = make_ref()
     expect(GPG.MockNativeAPI, :check_version, fn -> "1.17.1" end)
-    expect(GPG.MockNativeAPI, :engine_info, fn -> ref end)
+
+    expect(GPG.MockNativeAPI, :engine_info, fn ->
+      %{bin: "/usr/bin/gpg", directory: "~/.gnupg"}
+    end)
+
     expect(GPG.MockNativeAPI, :get_filename, fn ^ref -> "/usr/bin/gpg" end)
     expect(GPG.MockNativeAPI, :get_homedir, fn ^ref -> "/home/user/.gpg" end)
     expect(GPG.MockNativeAPI, :create_context, fn -> ctx end)

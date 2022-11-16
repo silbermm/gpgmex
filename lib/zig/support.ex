@@ -1,4 +1,4 @@
-defmodule GPG.ZigSupport do
+defmodule GPG.Zig.Support do
   @moduledoc false
 
   @include Application.compile_env(:gpgmex, :include_dir, ["/usr/include"])

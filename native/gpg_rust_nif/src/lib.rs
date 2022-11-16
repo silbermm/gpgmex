@@ -135,14 +135,25 @@ fn import_key(key: String, home_dir: String, path: String) -> Result<OkTuple, Er
     }
 }
 
+#[rustler::nif]
+fn public_key(email: String, home_dir: String, path: String) -> Result<OkTuple, Error> {
+    let mut ctx = get_context(home_dir, path)?;
+    let key: Key = find_key(&mut ctx, email)?;
+    Ok(OkTuple {
+        ok: atoms::ok(),
+        values: key.fingerprint().unwrap_or("").to_string()
+    })
+}
+
 rustler::init!(
-    "Elixir.GPG.NIF.Rust",
+    "Elixir.GPG.Rust.NIF",
     [
         check_version,
         check_openpgp_supported,
         engine_info,
         encrypt,
         decrypt,
-        import_key
+        import_key,
+        public_key
     ]
 );

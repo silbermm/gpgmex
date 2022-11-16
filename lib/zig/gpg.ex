@@ -13,14 +13,14 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-defmodule GPG.NIF do
+defmodule GPG.ZIG.NIF do
   @moduledoc false
   @behaviour GPG.NativeAPI
 
   @gpg_bin Application.compile_env(:gpgmex, :gpg_bin, "/usr/bin/gpg")
   @gpg_home Application.compile_env(:gpgmex, :gpg_home, "~/.gnupg")
 
-  use GPG.ZigSupport
+  use GPG.Zig.Support
 
   ~z"""
   const c = @cImport({
