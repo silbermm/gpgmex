@@ -14,9 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 defmodule GPG.Rust.GPG do
-  @moduledoc """
-  The module that calls into the actual NIF
-  """
+  @moduledoc false
   @behaviour GPG.NativeAPI
 
   @gpg_bin Application.compile_env(:gpgmex, :gpg_bin, "/usr/bin/gpg")

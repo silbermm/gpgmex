@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 defmodule GPG.Rust.NIF do
+  @moduledoc false
   use Rustler, otp_app: :gpgmex, crate: "gpg_rust_nif"
 
   def check_version(), do: :erlang.nif_error(:nif_not_loaded)
