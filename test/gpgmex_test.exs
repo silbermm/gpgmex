@@ -1,5 +1,5 @@
 defmodule GPGTest do
-  use GPG.Case
+  use GPG.Case, async: true
 
   @user_email "test@test.com"
   @invalid_email "invalid@test.com"

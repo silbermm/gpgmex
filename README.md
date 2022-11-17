@@ -6,8 +6,7 @@ Native Elixir bindings for GnuPG.
 
 ## Getting Started
 
-> This has only been tested on Linux - It likely won't work for
-> Mac OSX or Windows yet.
+> This has only been tested on Linux
 
 You'll need:
   * a working version of [gpg](https://gnupg.org/) installed

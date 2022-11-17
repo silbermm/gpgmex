@@ -119,7 +119,7 @@ defmodule GPG do
   ## Examples
 
       iex> GPG.get_public_key("matt@silbernagel.dev")
-      "4rZSsLVhrs1JCPtRWmUl1F2q2S5+MqBjTCYkS2Rk\\nphuo6u4XQ"
+      {:ok, "80C8F7AE64E589449FB0A03974DB6708422DD33B"}
   """
   @spec get_public_key(binary()) :: {:ok, binary()} | :error
   def get_public_key(email) do
