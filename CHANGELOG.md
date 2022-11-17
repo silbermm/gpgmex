@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
+
+## [0.0.7]
 ### Updated
   - Refactor NIF to use Rustler with the [gpgme crate](https://docs.rs/gpgme/latest/gpgme/index.html)
   - the GPG.get_public_key/1 function now just returns the fingerprint of the public key in the system
@@ -11,7 +13,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
   - key_info function that
     - returns the data (fingerprint, uid, email) about a text key passed into the function
-    - returns the data (fingerprint, uid, email) already imported into the system
 
 ## [0.0.6]
 ### Updated
@@ -41,5 +42,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Encrypt
     - Decrypt
 
-[Unreleased]: https://github.com/silbermm/gpgmex/compare/v0.0.1...HEAD
+[Unreleased]: https://github.com/silbermm/gpgmex/compare/v0.0.7...HEAD
+[0.0.7]: https://github.com/silbermm/gpgmex/releases/tag/v0.0.7
 [0.0.1]: https://github.com/silbermm/gpgmex/releases/tag/v0.0.1
