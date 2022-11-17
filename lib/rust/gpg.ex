@@ -25,13 +25,6 @@ defmodule GPG.Rust.GPG do
   alias GPG.Rust.NIF
 
   @impl true
-  def create_context() do
-    # this isn't required for the rust implementation, so we'll just
-    # create an empty ref
-    make_ref()
-  end
-
-  @impl true
   def check_version(), do: NIF.check_version()
 
   @impl true
@@ -41,26 +34,29 @@ defmodule GPG.Rust.GPG do
   def engine_info(), do: NIF.engine_info(@gpg_home, @gpg_bin)
 
   @impl true
-  def get_filename(_ref), do: engine_info().path()
+  def get_filename(), do: engine_info().path()
 
   @impl true
-  def get_homedir(_ref), do: engine_info().directory
+  def get_homedir(), do: engine_info().directory
 
   @impl true
-  def encrypt(_ref, email, data), do: NIF.encrypt(email, data, @gpg_home, @gpg_bin)
+  def encrypt(email, data), do: NIF.encrypt(email, data, @gpg_home, @gpg_bin)
 
   @impl true
-  def decrypt(_ref, data), do: NIF.decrypt(data, @gpg_home, @gpg_bin)
+  def decrypt(data), do: NIF.decrypt(data, @gpg_home, @gpg_bin)
 
   @impl true
-  def public_key(_ref, email), do: NIF.public_key(email, @gpg_home, @gpg_bin)
+  def public_key(email), do: NIF.public_key(email, @gpg_home, @gpg_bin)
 
   @impl true
-  def generate_key(_reference, _binary), do: :erlang.nif_error(:nif_not_loaded)
+  def generate_key(_binary), do: :erlang.nif_error(:nif_not_loaded)
 
   @impl true
-  def delete_key(_reference, _binary), do: :erlang.nif_error(:nif_not_loaded)
+  def delete_key(_binary), do: :erlang.nif_error(:nif_not_loaded)
 
   @impl true
-  def import_key(_reference, data), do: NIF.import_key(data, @gpg_home, @gpg_bin)
+  def import_key(data), do: NIF.import_key(data, @gpg_home, @gpg_bin)
+
+  @impl true
+  def key_info(public_key), do: NIF.key_info(public_key, @gpg_home, @gpg_bin)
 end

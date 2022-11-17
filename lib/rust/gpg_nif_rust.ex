@@ -27,4 +27,5 @@ defmodule GPG.Rust.NIF do
   def generate_key(_reference, _binary), do: :erlang.nif_error(:nif_not_loaded)
   def delete_key(_reference, _binary), do: :erlang.nif_error(:nif_not_loaded)
   def import_key(_binary, _home_dir, _path), do: :erlang.nif_error(:nif_not_loaded)
+  def key_info(_public_key, _home_dir, _path), do: :erlang.nif_error(:nif_not_loaded)
 end

@@ -48,8 +48,8 @@ defmodule GPG do
 
   ```elixir
   config :gpgmex,
-    include_dir: ["/usr/include/x86_64-linux-gnu", "/usr/include"],
-    lib_dir: ["/usr/lib/x86_64-linux-gnu/libgpgme.so"]
+    gpg_home: "~/.gnupg",    # where your gpg home path is
+    gpg_path: "/usr/bin/gpg" # where your gpg binary lives
   ```
 
   ### Arch based (Arch, Manjaro, etc)
@@ -66,8 +66,8 @@ defmodule GPG do
 
   ```elixir
   config :gpgmex,
-    include_dir: ["/usr/include"],
-    lib_dir: ["/usr/lib/libgpgme.so"]
+    gpg_home: "~/.gnupg",    # where your gpg home path is
+    gpg_path: "/usr/bin/gpg" # where your gpg binary lives
   ```
 
   ## Add to your Dependencies
@@ -76,7 +76,7 @@ defmodule GPG do
   ```elixir
   defp deps do
     [
-      {:gpgmex, "~> 0.0.1"}
+      {:gpgmex, "~> 0.0.7"}
     ]
   end
   ```
@@ -113,29 +113,17 @@ defmodule GPG do
     _e -> :error
   end
 
-  @spec create_context() :: reference() | {:error, any()}
-  defp create_context() do
-    # must check_version before creating a context
-    _version = GPG.NativeAPI.check_version()
-    GPG.NativeAPI.create_context()
-  catch
-    e -> {:error, e}
-  end
-
   @doc """
-  Get the public key for an email if the public key is on your system
+  Get the fingerprint of the public key for an email if the public key is on your system
 
   ## Examples
 
       iex> GPG.get_public_key("matt@silbernagel.dev")
       "4rZSsLVhrs1JCPtRWmUl1F2q2S5+MqBjTCYkS2Rk\\nphuo6u4XQ"
   """
-  @spec get_public_key(binary()) :: binary() | :error
+  @spec get_public_key(binary()) :: {:ok, binary()} | :error
   def get_public_key(email) do
-    create_context()
-    |> GPG.NativeAPI.public_key(email)
-    |> Enum.take_while(&(&1 != 170))
-    |> to_string()
+    GPG.NativeAPI.public_key(email)
   catch
     _e -> :error
   end
@@ -154,20 +142,7 @@ defmodule GPG do
   """
   @spec encrypt(String.t(), binary()) :: {:ok, binary()} | {:error, atom()}
   def encrypt(email, data) do
-    create_context()
-    |> GPG.NativeAPI.encrypt(email, data)
-    |> then(fn
-      {:ok, result} ->
-        data =
-          result
-          |> Enum.take_while(&(&1 != 170))
-          |> to_string()
-
-        {:ok, data}
-
-      e ->
-        e
-    end)
+    GPG.NativeAPI.encrypt(email, data)
   catch
     _e -> {:error, :unknown}
   end
@@ -186,20 +161,7 @@ defmodule GPG do
   """
   @spec decrypt(binary()) :: {:ok, binary()} | {:error, binary()}
   def decrypt(data) do
-    create_context()
-    |> GPG.NativeAPI.decrypt(data)
-    |> then(fn
-      {:ok, result} ->
-        data =
-          result
-          |> Enum.take_while(&(&1 != 170))
-          |> to_string()
-
-        {:ok, data}
-
-      e ->
-        e
-    end)
+    GPG.NativeAPI.decrypt(data)
   catch
     e -> {:error, to_string(e)}
   end
@@ -217,8 +179,7 @@ defmodule GPG do
   """
   @spec generate_key(String.t()) :: :ok | :error
   def generate_key(email) do
-    create_context()
-    |> GPG.NativeAPI.generate_key(email)
+    GPG.NativeAPI.generate_key(email)
   catch
     _e -> :error
   end
@@ -228,8 +189,7 @@ defmodule GPG do
   """
   @spec delete_key(binary()) :: number() | :error
   def delete_key(email) do
-    create_context()
-    |> GPG.NativeAPI.delete_key(email)
+    GPG.NativeAPI.delete_key(email)
   catch
     _e -> :error
   end
@@ -239,7 +199,14 @@ defmodule GPG do
   """
   @spec import_key(binary()) :: :ok | {:error, binary()}
   def import_key(data) do
-    create_context()
-    |> GPG.NativeAPI.import_key(data)
+    GPG.NativeAPI.import_key(data)
+  end
+
+  @doc """
+  Gets data about a public key
+  """
+  @spec key_info(binary()) :: map() | {:error, binary()}
+  def key_info(public_key) do
+    GPG.NativeAPI.key_info(public_key)
   end
 end

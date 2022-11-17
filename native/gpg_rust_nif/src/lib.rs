@@ -141,8 +141,47 @@ fn public_key(email: String, home_dir: String, path: String) -> Result<OkTuple, 
     let key: Key = find_key(&mut ctx, email)?;
     Ok(OkTuple {
         ok: atoms::ok(),
-        values: key.fingerprint().unwrap_or("").to_string()
+        values: key.fingerprint().unwrap_or("").to_string(),
     })
+}
+
+#[derive(NifMap)]
+struct PublicKeyInfo {
+    pub id: String,
+    pub fingerprint: String,
+    pub can_encrypt: bool,
+    pub is_valid: bool,
+    pub user_ids: Vec<String>,
+    pub email: Vec<String>,
+}
+
+#[rustler::nif]
+fn key_info(key: String, home_dir: String, path: String) -> Result<PublicKeyInfo, Error> {
+    let mut ctx = get_context(home_dir, path)?;
+    match Data::from_bytes(key) {
+        Ok(mut data_mem) => {
+            let mut d = ctx.read_keys(&mut data_mem).unwrap();
+            for k in d.by_ref().filter_map(|x| x.ok()) {
+                return Ok(PublicKeyInfo {
+                    id: k.id().unwrap_or("").to_string(),
+                    fingerprint: k.fingerprint().unwrap_or("invalid").to_string(),
+                    can_encrypt: k.can_encrypt(),
+                    is_valid: !k.is_invalid(),
+                    user_ids: k
+                        .user_ids()
+                        .enumerate()
+                        .map(|(_, uid)| uid.id().unwrap_or("invalid").to_string())
+                        .collect(),
+                    email: k
+                        .user_ids()
+                        .map(|uid| uid.email().unwrap_or("invalid").to_string())
+                        .collect(),
+                });
+            }
+            return Err(Error::Term(Box::new("no valid key found".to_string())));
+        }
+        Err(reason) => Err(Error::Term(Box::new(reason.to_string()))),
+    }
 }
 
 rustler::init!(
@@ -154,6 +193,7 @@ rustler::init!(
         encrypt,
         decrypt,
         import_key,
-        public_key
+        public_key,
+        key_info
     ]
 );

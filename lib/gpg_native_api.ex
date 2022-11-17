@@ -11,44 +11,46 @@ defmodule GPG.NativeAPI do
   @callback engine_info() :: any()
 
   @doc "Return the filename from engine_info"
-  @callback get_filename(reference()) :: any()
+  @callback get_filename() :: any()
 
   @doc "Return the homedir from engine_info"
-  @callback get_homedir(reference()) :: any()
-
-  @doc "Creates a reference to the GPG context"
-  @callback create_context() :: any()
+  @callback get_homedir() :: any()
 
   @doc "Encrypt some text"
-  @callback encrypt(reference(), binary(), binary()) :: any()
+  @callback encrypt(binary(), binary()) :: any()
 
   @doc "Decrypt some encrypted text"
-  @callback decrypt(reference(), binary()) :: any()
+  @callback decrypt(binary()) :: any()
 
   @doc "Get your public key"
-  @callback public_key(reference(), binary()) :: any()
+  @callback public_key(binary()) :: any()
 
   @doc "Generate a key"
-  @callback generate_key(reference(), binary()) :: any()
+  @callback generate_key(binary()) :: any()
 
   @doc "Delete a key"
-  @callback delete_key(reference(), binary()) :: any()
+  @callback delete_key(binary()) :: any()
 
   @doc "Import a key"
-  @callback import_key(reference(), binary()) :: any()
+  @callback import_key(binary()) :: any()
+
+  @doc """
+  Get information about the passed in public key
+  """
+  @callback key_info(binary()) :: any()
 
   defp impl, do: Application.get_env(:gpgmex, :native_api)
 
   def check_version(), do: impl().check_version()
   def check_openpgp_supported(), do: impl().check_openpgp_supported()
   def engine_info(), do: impl().engine_info()
-  def get_filename(ref), do: impl().get_filename(ref)
-  def get_homedir(ref), do: impl().get_homedir(ref)
-  def create_context(), do: impl().create_context()
-  def encrypt(ref, email, text), do: impl().encrypt(ref, email, text)
-  def decrypt(ref, text), do: impl().decrypt(ref, text)
-  def public_key(ref, email), do: impl().public_key(ref, email)
-  def generate_key(ref, email), do: impl().generate_key(ref, email)
-  def delete_key(ref, email), do: impl().delete_key(ref, email)
-  def import_key(ref, data), do: impl().import_key(ref, data)
+  def get_filename(), do: impl().get_filename()
+  def get_homedir(), do: impl().get_homedir()
+  def encrypt(email, text), do: impl().encrypt(email, text)
+  def decrypt(text), do: impl().decrypt(text)
+  def public_key(email), do: impl().public_key(email)
+  def generate_key(email), do: impl().generate_key(email)
+  def delete_key(email), do: impl().delete_key(email)
+  def import_key(data), do: impl().import_key(data)
+  def key_info(public_key), do: impl().key_info(public_key)
 end
