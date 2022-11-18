@@ -39,7 +39,7 @@ defmodule GPG.NativeAPI do
   """
   @callback key_info(binary()) :: any()
 
-  defp impl, do: Application.get_env(:gpgmex, :native_api)
+  defp impl, do: Application.get_env(:gpgmex, :native_api, GPG.Rust.GPG)
 
   def check_version(), do: impl().check_version()
   def check_openpgp_supported(), do: impl().check_openpgp_supported()
