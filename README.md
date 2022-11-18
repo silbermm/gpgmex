@@ -6,8 +6,7 @@ Native Elixir bindings for GnuPG.
 
 ## Getting Started
 
-> This has only been tested on Linux - It likely won't work for
-> Mac OSX or Windows yet.
+> This has only been tested on Linux
 
 You'll need:
   * a working version of [gpg](https://gnupg.org/) installed
@@ -28,8 +27,8 @@ Add this to `config.exs` in your app
 
 ```elixir
 config :gpgmex,
-  include_dir: ["/usr/include/x86_64-linux-gnu", "/usr/include"],
-  libs_dir: ["/usr/lib/x86_64-linux-gnu/libgpgme.so"]
+  gpg_home: "~/.gnupg",    # where your gpg home path is
+  gpg_path: "/usr/bin/gpg" # where your gpg binary lives
 ```
 
 ### Arch based (Arch, Manjaro, etc)
@@ -46,8 +45,8 @@ Add this to `config.exs` in your app
 
 ```elixir
 config :gpgmex,
-  include_dir: ["/usr/include"],
-  libs_dir: ["/usr/lib/libgpgme.so"]
+  gpg_home: "~/.gnupg",    # where your gpg home path is
+  gpg_path: "/usr/bin/gpg" # where your gpg binary lives
 ```
 
 ### Finally
@@ -56,7 +55,7 @@ Add gpgmex to your dependencies
 ```elixir
   defp deps do
     [
-      {:gpgmex, github: "silbermm/gpgmex"}
+      {:gpgmex, "~> 0.0.7"}
     ]
   end
 ```

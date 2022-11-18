@@ -10,7 +10,6 @@ defmodule GPGMEx.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       elixirc_paths: elixirc_paths(Mix.env()),
-      aliases: [docs: "zig_doc"],
       docs: docs()
     ]
   end
@@ -37,8 +36,8 @@ defmodule GPGMEx.MixProject do
 
   defp deps do
     [
-      {:zigler, "~> 0.9.1", runtime: false},
-      {:ex_doc, "~> 0.27.1", runtime: false},
+      {:rustler, "~> 0.26.0"},
+      {:ex_doc, "~> 0.29.0", runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev, :devci], runtime: false},
       {:credo, "~> 1.6", only: [:dev, :test, :ci], runtime: false},
       {:mox, "~> 1.0", only: [:test, :ci], runtime: false}

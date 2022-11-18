@@ -1,5 +1,5 @@
 defmodule GPGTest do
-  use GPG.Case
+  use GPG.Case, async: true
 
   @user_email "test@test.com"
   @invalid_email "invalid@test.com"
@@ -36,13 +36,13 @@ defmodule GPGTest do
     test "handles non-existent key when encrypting" do
       data = "This data should fail to be encrypted"
       cipher = GPG.encrypt(@invalid_email, data)
-      assert cipher == {:error, :keynoexist}
+      assert cipher == {:error, "Not found (gpg error 27)"}
     end
 
     test "handles invalid data when decrypting" do
       data = "-----BEGIN PGP MESSAGE-----"
       plain_text = GPG.decrypt(data)
-      assert plain_text == {:error, "unable to decrypt cipher"}
+      assert plain_text == {:error, "No data (gpg error 58)"}
     end
   end
 
@@ -53,6 +53,6 @@ defmodule GPGTest do
   end
 
   test "gets engine info" do
-    assert GPG.get_engine_info().filename == "/usr/bin/gpg"
+    assert GPG.get_engine_info().directory == "~/.gnupg"
   end
 end

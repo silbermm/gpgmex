@@ -24,7 +24,7 @@ jobs:
       uses: erlef/setup-beam@v1
       with:
         elixir-version: '1.13.2' # define the elixir version [required]
-        otp-version: '24.1' # define the otp version [required]
+        otp-version: '24.0' # define the otp version [required]
 
     - uses: actions/cache@v2
       with:
@@ -51,7 +51,7 @@ jobs:
       run: MIX_ENV=devci mix compile --warnings-as-errors
 
     - name: Compile-time Dependencies
-      run: MIX_ENV=ci mix xref graph --label compile-connected --fail-above 0
+      run: MIX_ENV=ci mix xref graph --label compile-connected --fail-above 2
 
     - name: Static Analysis
       run: MIX_ENV=devci mix dialyzer --halt-exit-status
