@@ -24,7 +24,7 @@ defmodule GPGMEx.MixProject do
     [
       description: "GPG Bindings",
       licenses: ["GPL-3.0-or-later"],
-      files: ["lib", "mix.exs", "README.md", "CHANGELOG.md", "COPYING*"],
+      files: ["lib", "native", "mix.exs", "README.md", "CHANGELOG.md", "COPYING*"],
       maintainers: ["Matt Silbernagel"],
       links: %{:GitHub => "https://github.com/silbermm/gpgmex", "GPG" => "https://gnupg.org/"}
     ]
