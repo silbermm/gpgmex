@@ -24,7 +24,15 @@ defmodule GPGMEx.MixProject do
     [
       description: "GPG Bindings",
       licenses: ["GPL-3.0-or-later"],
-      files: ["lib", "native/gpg_rust_nif/Cargo.toml", "native/gpg_rust_nif/src", "mix.exs", "README.md", "CHANGELOG.md", "COPYING*"],
+      files: [
+        "lib",
+        "native/gpg_rust_nif/Cargo.toml",
+        "native/gpg_rust_nif/src",
+        "mix.exs",
+        "README.md",
+        "CHANGELOG.md",
+        "COPYING*"
+      ],
       maintainers: ["Matt Silbernagel"],
       links: %{:GitHub => "https://github.com/silbermm/gpgmex", "GPG" => "https://gnupg.org/"}
     ]
