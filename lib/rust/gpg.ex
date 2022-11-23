@@ -17,8 +17,9 @@ defmodule GPG.Rust.GPG do
   @moduledoc false
   @behaviour GPG.NativeAPI
 
-  @gpg_bin Application.compile_env(:gpgmex, :gpg_bin, "/usr/bin/gpg")
-  @gpg_home Application.compile_env(:gpgmex, :gpg_home, "~/.gnupg")
+  defp gpg_bin, do: Application.get_env(:gpgmex, :gpg_bin, "/usr/bin/gpg")
+
+  def gpg_home, do: Application.get_env(:gpgmex, :gpg_home, "~/.gnupg")
 
   alias GPG.Rust.NIF
 
@@ -29,7 +30,7 @@ defmodule GPG.Rust.GPG do
   def check_openpgp_supported(), do: NIF.check_openpgp_supported()
 
   @impl true
-  def engine_info(), do: NIF.engine_info(@gpg_home, @gpg_bin)
+  def engine_info(), do: NIF.engine_info(gpg_home(), gpg_bin())
 
   @impl true
   def get_filename(), do: engine_info().path()
@@ -38,13 +39,13 @@ defmodule GPG.Rust.GPG do
   def get_homedir(), do: engine_info().directory
 
   @impl true
-  def encrypt(email, data), do: NIF.encrypt(email, data, @gpg_home, @gpg_bin)
+  def encrypt(email, data), do: NIF.encrypt(email, data, gpg_home(), gpg_bin())
 
   @impl true
-  def decrypt(data), do: NIF.decrypt(data, @gpg_home, @gpg_bin)
+  def decrypt(data), do: NIF.decrypt(data, gpg_home(), gpg_bin())
 
   @impl true
-  def public_key(email), do: NIF.public_key(email, @gpg_home, @gpg_bin)
+  def public_key(email), do: NIF.public_key(email, gpg_home(), gpg_bin())
 
   @impl true
   def generate_key(_binary), do: :erlang.nif_error(:nif_not_loaded)
@@ -53,8 +54,8 @@ defmodule GPG.Rust.GPG do
   def delete_key(_binary), do: :erlang.nif_error(:nif_not_loaded)
 
   @impl true
-  def import_key(data), do: NIF.import_key(data, @gpg_home, @gpg_bin)
+  def import_key(data), do: NIF.import_key(data, gpg_home(), gpg_bin())
 
   @impl true
-  def key_info(public_key), do: NIF.key_info(public_key, @gpg_home, @gpg_bin)
+  def key_info(public_key), do: NIF.key_info(public_key, gpg_home(), gpg_bin())
 end
