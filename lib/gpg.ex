@@ -167,6 +167,36 @@ defmodule GPG do
   end
 
   @doc """
+  Clearsigning causes the data to be wrapped in an ASCII-armored signature but otherwise does not modify the data.
+
+  This allows recipients of the data to verify that it is indeed from the correct person.
+
+  ## Examples
+      iex> GPG.clear_sign("data")
+      {:ok, "-----BEGIN PGP SIGNED MESSAGE-----\\nHash: SHA512\\n\\ndata\\n-----BEGIN PGP SIGNATURE-----\\n\\niQIzBAEBCgAdFiEEgMj3rmTliUSfsKA5dNtnCEIt0zsFAmQPzq0ACgkQdNtnCEIt\\n0zvsmw/+JZWfHhbHgqy9lw11QuagovqV0HQdk9C/wrzbrmeAP8g+AvkDDbo2GTP7\\neHOfOaWJDCD6qWvSt//JIs8khQfnQ3faBhPunQt+iPze1N9JSKTbJway3fJKr5dQ\\nyFAjFDt/AHFCGUzE37eld/TE+ehsj3H7fTxAe9GdPWM3r3n9MpggzCb5YQYSk7yy\\nYdWOWIhbyVt7RTk4hzuNh4wWaprQvuU38saDMMkZbHUxR0oIIoomfgsywLdb0HZA\\n8iGvex7uqyWPHCY2NMpdSJ4E0xBNURwarlHE32/sRZrISAMfW/nWY4tTWFHN8Spz\\ncBDclyzFkwjihMz/+9Dl4VfTN7UQuFh3/4Z12dl0RS9d1sz45bVcNy5DapArviOj\\nmaAzvYyodWQ8qthWZDT+ZAPCIky61gVLkcxqXArTamoxQbxBsLkGrNx2Up8caYBK\\nPH6o8XuIXTb640jzpOgPSL63qfn3HgvZr/9nyyhrZv3ASroSOCcLgvBaxl4MZ0pN\\nKnKJnklhCKdKcz2as+KPpWGXA7WKY5s/7JQdZDdSA2zYHwirNI0qaZ5UFgkyJWzJ\\ncu+v/ZjVgeidPKCD65Yn3UIY2wXWTqDcI5sSWXFTHnVljEeC16yjuzYWXgvYLDrM\\n0ypPbndz7WBckg5UKukAWPwQl0P61zBmywx13UZ1/9cww7Gp9Jw=\\n=MgoU\\n-----END PGP SIGNATURE-----\\n"}
+  """
+  @spec clear_sign(binary()) :: {:ok, binary()} | {:error, binary()}
+  def clear_sign(data) do
+    GPG.NativeAPI.clear_sign(data)
+  catch
+    e -> {:error, to_string(e)}
+  end
+
+  @doc """
+  Verifys the clear signed data.
+
+  ## Examples
+      iex> GPG.verify_clear("-----BEGIN PGP SIGNED MESSAGE-----\\nHash: SHA512\\n\\ndata\\n-----BEGIN PGP SIGNATURE-----\\n\\niQIzBAEBCgAdFiEEgMj3rmTliUSfsKA5dNtnCEIt0zsFAmQPzq0ACgkQdNtnCEIt\\n0zvsmw/+JZWfHhbHgqy9lw11QuagovqV0HQdk9C/wrzbrmeAP8g+AvkDDbo2GTP7\\neHOfOaWJDCD6qWvSt//JIs8khQfnQ3faBhPunQt+iPze1N9JSKTbJway3fJKr5dQ\\nyFAjFDt/AHFCGUzE37eld/TE+ehsj3H7fTxAe9GdPWM3r3n9MpggzCb5YQYSk7yy\\nYdWOWIhbyVt7RTk4hzuNh4wWaprQvuU38saDMMkZbHUxR0oIIoomfgsywLdb0HZA\\n8iGvex7uqyWPHCY2NMpdSJ4E0xBNURwarlHE32/sRZrISAMfW/nWY4tTWFHN8Spz\\ncBDclyzFkwjihMz/+9Dl4VfTN7UQuFh3/4Z12dl0RS9d1sz45bVcNy5DapArviOj\\nmaAzvYyodWQ8qthWZDT+ZAPCIky61gVLkcxqXArTamoxQbxBsLkGrNx2Up8caYBK\\nPH6o8XuIXTb640jzpOgPSL63qfn3HgvZr/9nyyhrZv3ASroSOCcLgvBaxl4MZ0pN\\nKnKJnklhCKdKcz2as+KPpWGXA7WKY5s/7JQdZDdSA2zYHwirNI0qaZ5UFgkyJWzJ\\ncu+v/ZjVgeidPKCD65Yn3UIY2wXWTqDcI5sSWXFTHnVljEeC16yjuzYWXgvYLDrM\\n0ypPbndz7WBckg5UKukAWPwQl0P61zBmywx13UZ1/9cww7Gp9Jw=\\n=MgoU\\n-----END PGP SIGNATURE-----\\n")
+      {:ok, "data\\n"}
+  """
+  @spec verify_clear(binary()) :: {:ok, binary()} | {:error, binary()}
+  def verify_clear(data) do
+    GPG.NativeAPI.verify_clear(data)
+  catch
+    e -> {:error, to_string(e)}
+  end
+
+  @doc """
   Generate a GPG key using the provided email address.
 
   This generates a new GPG using rsa3072 encryption. It will

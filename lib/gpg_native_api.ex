@@ -22,6 +22,12 @@ defmodule GPG.NativeAPI do
   @doc "Decrypt some encrypted text"
   @callback decrypt(binary()) :: any()
 
+  @doc "Clear sign some data"
+  @callback clear_sign(binary()) :: any()
+
+  @doc "Verify some clear signed text"
+  @callback verify_clear(binary()) :: any()
+
   @doc "Get your public key"
   @callback public_key(binary()) :: any()
 
@@ -48,6 +54,8 @@ defmodule GPG.NativeAPI do
   def get_homedir(), do: impl().get_homedir()
   def encrypt(email, text), do: impl().encrypt(email, text)
   def decrypt(text), do: impl().decrypt(text)
+  def clear_sign(text), do: impl().clear_sign(text)
+  def verify_clear(text), do: impl().verify_clear(text)
   def public_key(email), do: impl().public_key(email)
   def generate_key(email), do: impl().generate_key(email)
   def delete_key(email), do: impl().delete_key(email)
