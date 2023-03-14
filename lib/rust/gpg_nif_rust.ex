@@ -24,6 +24,8 @@ defmodule GPG.Rust.NIF do
   def get_homedir(_ref), do: :erlang.nif_error(:nif_not_loaded)
   def encrypt(_email, _data, _home_dir, _path), do: :erlang.nif_error(:nif_not_loaded)
   def decrypt(_data, _home_dir, _path), do: :erlang.nif_error(:nif_not_loaded)
+  def clear_sign(_data, _home_dir, _path), do: :erlang.nif_error(:nif_not_loaded)
+  def verify_clear(_data, _home_dir, _path), do: :erlang.nif_error(:nif_not_loaded)
   def public_key(_email, _home_dir, _path), do: :erlang.nif_error(:nif_not_loaded)
   def generate_key(_reference, _binary), do: :erlang.nif_error(:nif_not_loaded)
   def delete_key(_reference, _binary), do: :erlang.nif_error(:nif_not_loaded)

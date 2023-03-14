@@ -45,6 +45,12 @@ defmodule GPG.Rust.GPG do
   def decrypt(data), do: NIF.decrypt(data, gpg_home(), gpg_bin())
 
   @impl true
+  def clear_sign(data), do: NIF.clear_sign(data, gpg_home(), gpg_bin())
+
+  @impl true
+  def verify_clear(data), do: NIF.verify_clear(data, gpg_home(), gpg_bin())
+
+  @impl true
   def public_key(email), do: NIF.public_key(email, gpg_home(), gpg_bin())
 
   @impl true

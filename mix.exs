@@ -4,7 +4,7 @@ defmodule GPGMEx.MixProject do
   def project do
     [
       app: :gpgmex,
-      version: "0.0.10-pre",
+      version: "0.0.11-pre",
       elixir: "~> 1.12",
       package: package(),
       start_permanent: Mix.env() == :prod,

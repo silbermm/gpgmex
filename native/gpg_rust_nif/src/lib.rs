@@ -113,6 +113,41 @@ fn decrypt(data: String, home_dir: String, path: String) -> Result<OkTuple, Erro
 }
 
 #[rustler::nif]
+fn clear_sign(data: String, home_dir: String, path: String) -> Result<OkTuple, Error> {
+    let mut ctx = get_context(home_dir, path)?;
+    let mut output = Vec::new();
+
+    match ctx.sign_clear(data, &mut output) {
+        Ok(..) => match String::from_utf8(output) {
+            Ok(s) => Ok(OkTuple{
+                ok: atoms::ok(),
+                values: s.to_string(),
+            }),
+            Err(e) => Err(Error::Term(Box::new(e.to_string()))),
+        },
+        Err(reason) => Err(Error::Term(Box::new(reason.to_string()))),
+    }
+}
+
+#[rustler::nif]
+fn verify_clear(data: String, home_dir: String, path: String) -> Result<OkTuple, Error> {
+    let mut ctx = get_context(home_dir, path)?;
+    let mut output = Vec::new();
+
+    match ctx.verify_opaque(data, &mut output) {
+        Ok(..) => match String::from_utf8(output) {
+            Ok(s) => Ok(OkTuple{
+                ok: atoms::ok(),
+                values: s.to_string(),
+            }),
+            Err(e) => Err(Error::Term(Box::new(e.to_string()))),
+        },
+        Err(reason) => Err(Error::Term(Box::new(reason.to_string()))),
+    }
+}
+ 
+
+#[rustler::nif]
 fn import_key(key: String, home_dir: String, path: String) -> Result<OkTuple, Error> {
     let mut ctx = get_context(home_dir, path)?;
 
@@ -192,6 +227,8 @@ rustler::init!(
         engine_info,
         encrypt,
         decrypt,
+        clear_sign,
+        verify_clear,
         import_key,
         public_key,
         key_info
