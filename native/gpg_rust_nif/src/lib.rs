@@ -119,7 +119,7 @@ fn clear_sign(data: String, home_dir: String, path: String) -> Result<OkTuple, E
 
     match ctx.sign_clear(data, &mut output) {
         Ok(..) => match String::from_utf8(output) {
-            Ok(s) => Ok(OkTuple{
+            Ok(s) => Ok(OkTuple {
                 ok: atoms::ok(),
                 values: s.to_string(),
             }),
@@ -136,7 +136,7 @@ fn verify_clear(data: String, home_dir: String, path: String) -> Result<OkTuple,
 
     match ctx.verify_opaque(data, &mut output) {
         Ok(..) => match String::from_utf8(output) {
-            Ok(s) => Ok(OkTuple{
+            Ok(s) => Ok(OkTuple {
                 ok: atoms::ok(),
                 values: s.to_string(),
             }),
@@ -145,7 +145,6 @@ fn verify_clear(data: String, home_dir: String, path: String) -> Result<OkTuple,
         Err(reason) => Err(Error::Term(Box::new(reason.to_string()))),
     }
 }
- 
 
 #[rustler::nif]
 fn import_key(key: String, home_dir: String, path: String) -> Result<OkTuple, Error> {
