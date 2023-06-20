@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
+## [0.0.11]
+### Updated
+  - update rustler to 0.28.0
+  - update to latest version of rustler-sys to work with erlang 26 and above
+
 ## [0.0.10]
 ### Added
   - function for clearsigning data
