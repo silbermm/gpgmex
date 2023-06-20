@@ -44,7 +44,7 @@ defmodule GPGMEx.MixProject do
 
   defp deps do
     [
-      {:rustler, "~> 0.26.0"},
+      {:rustler, "~> 0.28.0"},
       {:ex_doc, "~> 0.29.0", runtime: false},
       {:dialyxir, "~> 1.0", only: [:dev, :devci], runtime: false},
       {:credo, "~> 1.6", only: [:dev, :test, :ci], runtime: false},
