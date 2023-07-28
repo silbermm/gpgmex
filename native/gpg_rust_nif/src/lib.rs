@@ -1,4 +1,4 @@
-use gpgme::{Context, Data, EncryptFlags, Key, Protocol};
+use gpgme::{Context, Data, EncryptFlags, Key, Protocol, KeyListMode};
 use rustler::{Atom, Error, NifMap, NifTuple};
 
 mod atoms {
@@ -187,6 +187,7 @@ struct PublicKeyInfo {
     pub is_valid: bool,
     pub user_ids: Vec<String>,
     pub email: Vec<String>,
+    pub can_sign: bool
 }
 
 #[rustler::nif]
@@ -210,12 +211,45 @@ fn key_info(key: String, home_dir: String, path: String) -> Result<PublicKeyInfo
                         .user_ids()
                         .map(|uid| uid.email().unwrap_or("invalid").to_string())
                         .collect(),
+                    can_sign: k.can_sign(),
                 });
             }
             return Err(Error::Term(Box::new("no valid key found".to_string())));
         }
         Err(reason) => Err(Error::Term(Box::new(reason.to_string()))),
     }
+}
+
+#[rustler::nif]
+fn list_keys(home_dir: String, path: String) -> Result<Vec<PublicKeyInfo>, Error> {
+    let mut ctx = get_context(home_dir, path)?;
+    ctx.set_key_list_mode(KeyListMode::LOCAL).unwrap();
+    let mut keys = ctx.find_keys(Vec::<String>::new()).unwrap();
+    let keyinfos = keys
+        .by_ref()
+        .filter_map(|x| x.ok())
+        .map(|k| PublicKeyInfo {
+            id: k.id().unwrap_or("").to_string(),
+            fingerprint: k.fingerprint().unwrap_or("invalid").to_string(),
+            can_encrypt: k.can_encrypt(),
+            is_valid: !k.is_invalid(),
+            user_ids: k
+                .user_ids()
+                .enumerate()
+                .map(|(_, uid)| uid.id().unwrap_or("invalid").to_string())
+                .collect(),
+            email: k
+                .user_ids()
+                .map(|uid| uid.email().unwrap_or("invalid").to_string())
+                .collect(),
+            can_sign: k.can_sign(),
+        })
+        .collect();
+
+    if keys.finish().unwrap().is_truncated() {
+        return Err(Error::Term(Box::new("key listing failed".to_string())));
+    }
+    Ok(keyinfos)
 }
 
 rustler::init!(
@@ -230,6 +264,7 @@ rustler::init!(
         verify_clear,
         import_key,
         public_key,
-        key_info
+        key_info,
+        list_keys
     ]
 );
