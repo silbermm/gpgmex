@@ -239,4 +239,12 @@ defmodule GPG do
   def key_info(public_key) do
     GPG.NativeAPI.key_info(public_key)
   end
+
+  @doc """
+  List all known keys on the system.
+  """
+  @spec list_keys() :: [map()]
+  def list_keys() do
+    GPG.NativeAPI.list_keys()
+  end
 end

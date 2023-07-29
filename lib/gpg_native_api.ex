@@ -45,6 +45,9 @@ defmodule GPG.NativeAPI do
   """
   @callback key_info(binary()) :: any()
 
+  @doc "List local keys"
+  @callback list_keys() :: any()
+
   defp impl, do: Application.get_env(:gpgmex, :native_api, GPG.Rust.GPG)
 
   def check_version(), do: impl().check_version()
@@ -61,4 +64,5 @@ defmodule GPG.NativeAPI do
   def delete_key(email), do: impl().delete_key(email)
   def import_key(data), do: impl().import_key(data)
   def key_info(public_key), do: impl().key_info(public_key)
+  def list_keys(), do: impl().list_keys()
 end

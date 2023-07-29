@@ -55,4 +55,9 @@ defmodule GPGTest do
   test "gets engine info" do
     assert GPG.get_engine_info().directory == "~/.gnupg"
   end
+
+  test "lists gpg keys" do
+    keys = GPG.list_keys()
+    assert Enum.find(keys, fn k -> k.email == [@user_email] end)
+  end
 end

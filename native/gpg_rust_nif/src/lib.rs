@@ -187,7 +187,7 @@ struct PublicKeyInfo {
     pub is_valid: bool,
     pub user_ids: Vec<String>,
     pub email: Vec<String>,
-    pub can_sign: bool
+    pub has_secret: bool
 }
 
 #[rustler::nif]
@@ -211,7 +211,7 @@ fn key_info(key: String, home_dir: String, path: String) -> Result<PublicKeyInfo
                         .user_ids()
                         .map(|uid| uid.email().unwrap_or("invalid").to_string())
                         .collect(),
-                    can_sign: k.can_sign(),
+                    has_secret: k.has_secret(),
                 });
             }
             return Err(Error::Term(Box::new("no valid key found".to_string())));
@@ -223,7 +223,11 @@ fn key_info(key: String, home_dir: String, path: String) -> Result<PublicKeyInfo
 #[rustler::nif]
 fn list_keys(home_dir: String, path: String) -> Result<Vec<PublicKeyInfo>, Error> {
     let mut ctx = get_context(home_dir, path)?;
-    ctx.set_key_list_mode(KeyListMode::LOCAL).unwrap();
+    let mut mode = KeyListMode::empty();
+    mode.insert(KeyListMode::LOCAL);
+    mode.insert(KeyListMode::WITH_SECRET);
+    ctx.set_key_list_mode(mode).unwrap();
+
     let mut keys = ctx.find_keys(Vec::<String>::new()).unwrap();
     let keyinfos = keys
         .by_ref()
@@ -242,7 +246,7 @@ fn list_keys(home_dir: String, path: String) -> Result<Vec<PublicKeyInfo>, Error
                 .user_ids()
                 .map(|uid| uid.email().unwrap_or("invalid").to_string())
                 .collect(),
-            can_sign: k.can_sign(),
+            has_secret: k.has_secret(),
         })
         .collect();
 
