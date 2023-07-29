@@ -67,5 +67,4 @@ defmodule GPG.Rust.GPG do
 
   @impl true
   def list_keys(), do: NIF.list_keys(gpg_home(), gpg_bin())
-
 end
