@@ -48,7 +48,7 @@ defmodule GPG.NativeAPI do
   @doc "List local keys"
   @callback list_keys() :: any()
 
-  defp impl, do: Application.get_env(:gpgmex, :native_api, GPG.Rust.GPG)
+  defp impl, do: Application.get_env(:gpgmex, :native_api)
 
   def check_version(), do: impl().check_version()
   def check_openpgp_supported(), do: impl().check_openpgp_supported()

@@ -51,7 +51,7 @@ jobs:
       run: MIX_ENV=devci mix compile --warnings-as-errors
 
     - name: Compile-time Dependencies
-      run: MIX_ENV=ci mix xref graph --label compile-connected --fail-above 2
+      run: MIX_ENV=ci mix xref graph --label compile-connected --fail-above 0
 
     - name: Static Analysis
       run: MIX_ENV=devci mix dialyzer --halt-exit-status
