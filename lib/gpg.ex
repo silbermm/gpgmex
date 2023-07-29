@@ -76,7 +76,7 @@ defmodule GPG do
   ```elixir
   defp deps do
     [
-      {:gpgmex, "~> 0.0.7"}
+      {:gpgmex, "~> 0.0.12"}
     ]
   end
   ```
