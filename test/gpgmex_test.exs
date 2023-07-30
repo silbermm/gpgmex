@@ -5,7 +5,7 @@ defmodule GPGTest do
   @invalid_email "invalid@test.com"
 
   # this requires that GPG key exists on the system for @user_email.
-  # To do this, simply load iex and run `GPG.generate_key/2` and 
+  # To do this, simply load iex and run `GPG.generate_key/1` and 
   # don't use a password
   describe "encrypt and decrypt" do
     # I would rather do this, but haven't found a way to yet
@@ -59,5 +59,10 @@ defmodule GPGTest do
   test "lists gpg keys" do
     keys = GPG.list_keys()
     assert Enum.find(keys, fn k -> k.email == [@user_email] end)
+  end
+
+  test "generate key fails for already existing key" do
+    assert {:error, msg} = GPG.generate_key(@user_email)
+    assert msg =~ "User ID already exists"
   end
 end

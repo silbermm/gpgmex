@@ -54,9 +54,6 @@ defmodule GPG.Rust.GPG do
   def public_key(email), do: NIF.public_key(email, gpg_home(), gpg_bin())
 
   @impl true
-  def generate_key(_binary), do: :erlang.nif_error(:nif_not_loaded)
-
-  @impl true
   def delete_key(_binary), do: :erlang.nif_error(:nif_not_loaded)
 
   @impl true
@@ -67,4 +64,7 @@ defmodule GPG.Rust.GPG do
 
   @impl true
   def list_keys(), do: NIF.list_keys(gpg_home(), gpg_bin())
+
+  @impl true
+  def generate_key(email), do: NIF.generate_key(email, gpg_home(), gpg_bin())
 end

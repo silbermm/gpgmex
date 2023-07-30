@@ -256,6 +256,20 @@ fn list_keys(home_dir: String, path: String) -> Result<Vec<PublicKeyInfo>, Error
     Ok(keyinfos)
 }
 
+#[rustler::nif]
+fn generate_key(email: String, home_dir: String, path: String) -> Result<OkTuple, Error> {
+    let mut ctx = get_context(home_dir, path)?;
+    match ctx.create_key(email, "default", Default::default()) {
+        Ok(key) => 
+            Ok(OkTuple {
+                ok: atoms::ok(),
+                values: key.fingerprint().unwrap_or("").to_string(),
+            }),
+        Err(reason) => Err(Error::Term(Box::new(reason.to_string()))),
+    }
+
+}
+
 rustler::init!(
     "Elixir.GPG.Rust.NIF",
     [
@@ -269,6 +283,7 @@ rustler::init!(
         import_key,
         public_key,
         key_info,
-        list_keys
+        list_keys,
+        generate_key
     ]
 );

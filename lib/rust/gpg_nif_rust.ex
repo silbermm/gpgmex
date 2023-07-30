@@ -32,4 +32,5 @@ defmodule GPG.Rust.NIF do
   def import_key(_binary, _home_dir, _path), do: :erlang.nif_error(:nif_not_loaded)
   def key_info(_public_key, _home_dir, _path), do: :erlang.nif_error(:nif_not_loaded)
   def list_keys(_home_dir, _path), do: :erlang.nif_error(:nif_not_loaded)
+  def generate_key(_email, _home_dir, _path), do: :erlang.nif_error(:nif_not_loaded)
 end
