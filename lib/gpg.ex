@@ -207,7 +207,7 @@ defmodule GPG do
       iex> GPG.generate_key("my_new@email.com")
       :ok
   """
-  @spec generate_key(String.t()) :: :ok | :error
+  @spec generate_key(String.t()) :: {:ok, binary()} | :error
   def generate_key(email) do
     GPG.NativeAPI.generate_key(email)
   catch
