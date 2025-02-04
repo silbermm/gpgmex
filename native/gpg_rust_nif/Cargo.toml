@@ -10,9 +10,20 @@ path = "src/lib.rs"
 crate-type = ["cdylib"]
 
 [dependencies]
+rustler = { version = "0.29", default-features = false, features = ["derive"] }
 gpgme = "0.11.0"
-rustler = "0.28.0"
 rustler_sys = "2.2.1"
 
 [profile.release]
 opt-level = "z"
+
+[build.env]
+passthrough = [
+  "RUSTLER_NIF_VERSION"
+]
+
+[features]
+default = ["nif_version_2_15"]
+nif_version_2_15 = ["rustler/nif_version_2_15"]
+nif_version_2_16 = ["rustler/nif_version_2_16"]
+nif_version_2_17 = ["rustler/nif_version_2_17"]
